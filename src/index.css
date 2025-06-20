@@ -8,4 +8,13 @@
         rounded-full border border-gray-500 
         px-[6px] py-[7px] bg-gray-50;
     }
+    .scrollbar-hide {
+        -ms-overflow-style: none;  /* IE and Edge */
+        scrollbar-width: none;     /* Firefox */
+    }
+    .scrollbar-hide::-webkit-scrollbar {
+        display: none;             /* Chrome, Safari and Opera */
+    }
+
+    
 }
