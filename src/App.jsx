@@ -1,20 +1,28 @@
-import { useEffect, useState } from 'react';
+// src/App.jsx
+import React from 'react'
+import { Routes, Route } from 'react-router-dom'
+import AdminLayout from './layouts/AdminLayout'
 
-function App() {
-  const [message, setMessage] = useState('');
+// Admin pages
+import Dashboard from './pages/admin/Dashboard'
+import UserList from './pages/admin/UserList'
+import ProductList from './pages/admin/ProductList'
 
-  useEffect(() => {
-    fetch('http://127.0.0.1:8000/api/hello')
-      .then((res) => res.json())
-      .then((data) => setMessage(data.message))
-      .catch((err) => console.error('Lỗi:', err));
-  }, []);
+import { useRoutes } from 'react-router-dom'
+import routes from './routes'
 
+const App = () => {
   return (
-    <div className="text-center mt-10 text-2xl text-blue-600">
-      {message || 'Đang tải...'}
-    </div>
-  );
+    // <Routes>
+    //   <Route path="/admin" element={<AdminLayout />}>
+    //     <Route index element={<Dashboard />} />
+    //     <Route path="users" element={<UserList />} />
+    //     <Route path="products" element={<ProductList />} />
+    //   </Route>
+    // </Routes>
+
+    useRoutes(routes)
+  )
 }
 
-export default App;
+export default App

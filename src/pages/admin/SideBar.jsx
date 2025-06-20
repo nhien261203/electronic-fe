@@ -53,37 +53,37 @@ const SideBar = ({ collapsed, isMobile }) => {
                         <SectionTitle title="QUẢN LÝ HỆ THỐNG" />
                     </FadeInWhenVisible>
 
-                    <SidebarLink to="/admin/products" icon={<FaThList />} label="Sản phẩm" collapsed={collapsed} />
-                    <SidebarLink to="/admin/categories" icon={<FaBoxes />} label="Danh mục" collapsed={collapsed} />
-                    <SidebarLink to="/admin/brands" icon={<FaTags />} label="Thương hiệu" collapsed={collapsed} />
-                    <SidebarLink to="/admin/product-images" icon={<FaImage />} label="Hình ảnh" collapsed={collapsed} />
-                    <SidebarLink to="/admin/slides" icon={<FaImage />} label="Slider" collapsed={collapsed} />
-                    <SidebarLink to="/admin/suppliers" icon={<FaTruckLoading />} label="Nhà cung cấp" collapsed={collapsed} />
+                    <SidebarLink to="products" icon={<FaThList />} label="Sản phẩm" collapsed={collapsed} />
+                    <SidebarLink icon={<FaBoxes />} label="Danh mục" collapsed={collapsed} />
+                    <SidebarLink icon={<FaTags />} label="Thương hiệu" collapsed={collapsed} />
+                    <SidebarLink icon={<FaImage />} label="Hình ảnh" collapsed={collapsed} />
+                    <SidebarLink icon={<FaImage />} label="Slider" collapsed={collapsed} />
+                    <SidebarLink icon={<FaTruckLoading />} label="Nhà cung cấp" collapsed={collapsed} />
 
                     <FadeInWhenVisible show={!collapsed}>
                         <SectionTitle title="QUẢN LÝ ĐƠN HÀNG" />
                     </FadeInWhenVisible>
 
-                    <SidebarLink to="/admin/orders" icon={<FaClipboardList />} label="Đơn hàng" collapsed={collapsed} />
-                    <SidebarLink to="/admin/imports" icon={<FaTruckLoading />} label="Nhập hàng" collapsed={collapsed} />
+                    <SidebarLink icon={<FaClipboardList />} label="Đơn hàng" collapsed={collapsed} />
+                    <SidebarLink icon={<FaTruckLoading />} label="Nhập hàng" collapsed={collapsed} />
 
                     <FadeInWhenVisible show={!collapsed}>
                         <SectionTitle title="NGƯỜI DÙNG" />
                     </FadeInWhenVisible>
 
-                    <SidebarLink to="/admin/users" icon={<FaUsers />} label="Khách hàng" collapsed={collapsed} />
-                    <SidebarLink to="/admin/admins" icon={<FaUserShield />} label="Quản trị viên" collapsed={collapsed} />
+                    <SidebarLink to="users" icon={<FaUsers />} label="Khách hàng" collapsed={collapsed} />
+                    <SidebarLink icon={<FaUserShield />} label="Quản trị viên" collapsed={collapsed} />
 
                     <FadeInWhenVisible show={!collapsed}>
                         <SectionTitle title="KHÁC" />
                     </FadeInWhenVisible>
 
-                    <SidebarLink to="/admin/settings" icon={<FaCog />} label="Cài đặt" collapsed={collapsed} />
+                    <SidebarLink icon={<FaCog />} label="Cài đặt" collapsed={collapsed} />
 
                     <FadeInWhenVisible show={!collapsed}>
                         <SectionTitle title="LOG-ACTION " />
                     </FadeInWhenVisible>
-                    <SidebarLink to="/admin/logs" icon={<FaClipboardList />} label="Lịch sử hoạt động" collapsed={collapsed} />
+                    <SidebarLink icon={<FaClipboardList />} label="Lịch sử hoạt động" collapsed={collapsed} />
 
                 </nav>
             </div>
