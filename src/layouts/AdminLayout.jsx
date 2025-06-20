@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import Header from '../pages/admin/Header'
 import { Outlet } from 'react-router-dom'
 import SideBar from '../pages/admin/SideBar'
+import Footer from '../pages/admin/Footer'
 
 
 const AdminLayout = () => {
@@ -39,11 +40,14 @@ const AdminLayout = () => {
                         />
                     )}
 
-                    
-
+                    {/* Main content cuộn cùng sidebar */}
+                    <div className="flex-1 overflow-auto p-4 pt-20 scrollbar-hide">
+                        <Outlet />
+                    </div>
 
                 </div>
             </div>
+            <Footer />
 
         </>
     )
