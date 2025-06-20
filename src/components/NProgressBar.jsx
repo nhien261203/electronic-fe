@@ -1,19 +1,25 @@
 import { useEffect } from 'react'
-import { useNavigation } from 'react-router-dom'
+import { useLocation } from 'react-router-dom'
 import NProgress from 'nprogress'
+import 'nprogress/nprogress.css'
 
-NProgress.configure({ showSpinner: false }) // tùy chỉnh nếu muốn
+NProgress.configure({ showSpinner: false })
 
 const NProgressBar = () => {
-    const navigation = useNavigation()
+    const location = useLocation()
 
     useEffect(() => {
-        if (navigation.state === 'loading') {
-            NProgress.start()
-        } else {
+        NProgress.start()
+
+        // Tạo một timeout nhỏ để tránh nhấp nháy nếu route quá nhanh
+        const timeout = setTimeout(() => {
             NProgress.done()
+        }, 300)
+
+        return () => {
+            clearTimeout(timeout)
         }
-    }, [navigation.state])
+    }, [location.pathname])
 
     return null
 }

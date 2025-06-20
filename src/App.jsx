@@ -1,27 +1,36 @@
-// src/App.jsx
 import React from 'react'
-import { Routes, Route } from 'react-router-dom'
-import AdminLayout from './layouts/AdminLayout'
-
-// Admin pages
-import Dashboard from './pages/admin/Dashboard'
-import UserList from './pages/admin/UserList'
-import ProductList from './pages/admin/ProductList'
-
 import { useRoutes } from 'react-router-dom'
 import routes from './routes'
 
-const App = () => {
-  return (
-    // <Routes>
-    //   <Route path="/admin" element={<AdminLayout />}>
-    //     <Route index element={<Dashboard />} />
-    //     <Route path="users" element={<UserList />} />
-    //     <Route path="products" element={<ProductList />} />
-    //   </Route>
-    // </Routes>
+import { ToastContainer } from 'react-toastify'
+import NProgressBar from './components/NProgressBar'
 
-    useRoutes(routes)
+import 'react-toastify/dist/ReactToastify.css'
+import 'nprogress/nprogress.css'
+import './styles/nprogress.css'
+
+const App = () => {
+  const element = useRoutes(routes)
+
+  return (
+    <>
+
+      {/* Hiển thị thông báo toast */}
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick={true}
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
+
+      {/* Render nội dung từ routes */}
+      {element}
+    </>
   )
 }
 
