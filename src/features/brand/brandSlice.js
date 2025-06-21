@@ -1,16 +1,13 @@
 // src/features/brand/brandSlice.js
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-import axios from 'axios'
+import { createBrandAPI, fetchBrandsAPI } from './brandAPI'
 
 // Gửi API tạo brand
 export const createBrand = createAsyncThunk(
     'brand/createBrand',
     async (formData, { rejectWithValue }) => {
         try {
-            const response = await axios.post('http://localhost:8000/api/brands', formData, {
-                headers: { 'Content-Type': 'multipart/form-data' }
-            })
-            return response.data
+            return await createBrandAPI(formData)
         } catch (err) {
             return rejectWithValue(err.response?.data || { message: 'Lỗi không xác định' })
         }
@@ -22,14 +19,14 @@ export const fetchBrands = createAsyncThunk(
     'brand/fetchBrands',
     async (_, { rejectWithValue }) => {
         try {
-            const res = await axios.get('http://localhost:8000/api/brands')
-            return res.data.data // Giả sử Laravel trả về dạng { data: [...] }
+            return await fetchBrandsAPI()
         } catch (err) {
             return rejectWithValue(err.response?.data?.message || 'Lỗi không xác định')
         }
     }
 )
 
+// Slice
 const brandSlice = createSlice({
     name: 'brand',
     initialState: {
@@ -50,7 +47,6 @@ const brandSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder
-            // Tạo brand
             .addCase(createBrand.pending, (state) => {
                 state.loading = true
                 state.error = null
@@ -64,8 +60,6 @@ const brandSlice = createSlice({
                 state.loading = false
                 state.error = action.payload?.errors || { message: action.payload?.message }
             })
-
-            // Lấy brands
             .addCase(fetchBrands.pending, (state) => {
                 state.loading = true
                 state.error = null
