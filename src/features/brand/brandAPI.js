@@ -11,8 +11,8 @@ export const createBrandAPI = async (formData) => {
     return response.data
 }
 
-// Gọi API lấy danh sách thương hiệu
-export const fetchBrandsAPI = async () => {
-    const response = await axios.get(API_URL)
-    return response.data.data // Laravel trả về { data: [...] }
+export const fetchBrandsAPI = async (page = 1, perPage = 5) => {
+    const response = await axios.get(`http://localhost:8000/api/brands?page=${page}&per_page=${perPage}`)
+    return response.data // Trả về object: { current_page, data, total, per_page, last_page, ... }
 }
+

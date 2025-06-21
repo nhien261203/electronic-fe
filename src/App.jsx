@@ -3,11 +3,7 @@ import { useRoutes } from 'react-router-dom'
 import routes from './routes'
 
 import { ToastContainer } from 'react-toastify'
-import NProgressBar from './components/NProgressBar'
-
 import 'react-toastify/dist/ReactToastify.css'
-import 'nprogress/nprogress.css'
-import './styles/nprogress.css'
 
 const App = () => {
   const element = useRoutes(routes)
