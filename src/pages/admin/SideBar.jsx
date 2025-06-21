@@ -55,7 +55,7 @@ const SideBar = ({ collapsed, isMobile }) => {
 
                     <SidebarLink to="products" icon={<FaThList />} label="Sản phẩm" collapsed={collapsed} />
                     <SidebarLink icon={<FaBoxes />} label="Danh mục" collapsed={collapsed} />
-                    <SidebarLink icon={<FaTags />} label="Thương hiệu" collapsed={collapsed} />
+                    <SidebarLink to="add-brand" icon={<FaTags />} label="Thương hiệu" collapsed={collapsed} />
                     <SidebarLink icon={<FaImage />} label="Hình ảnh" collapsed={collapsed} />
                     <SidebarLink icon={<FaImage />} label="Slider" collapsed={collapsed} />
                     <SidebarLink icon={<FaTruckLoading />} label="Nhà cung cấp" collapsed={collapsed} />
