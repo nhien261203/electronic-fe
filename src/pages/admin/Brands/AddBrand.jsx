@@ -3,9 +3,11 @@ import { useDispatch, useSelector } from 'react-redux'
 import { createBrand, resetState } from '../../../features/brand/brandSlice'
 import { FaImages } from 'react-icons/fa'
 import { toast } from 'react-toastify'
+import { useNavigate } from 'react-router-dom'
 
 const AddBrand = () => {
     const dispatch = useDispatch()
+    const navigate = useNavigate()
     const { loading, success, error } = useSelector((state) => state.brand)
 
     const [form, setForm] = useState({ name: '', country: '', logo: null })
@@ -40,14 +42,11 @@ const AddBrand = () => {
     useEffect(() => {
         if (success) {
             toast.success('Thêm thương hiệu thành công!')
-            setForm({ name: '', country: '', logo: null })
-            setLogoPreview(null)
             dispatch(resetState())
+            navigate('/admin/brands') // ✅ Điều hướng sau khi thêm
         }
 
         if (error) {
-            console.log('Lỗi:', error)
-
             const errObj = error.errors ?? error
 
             if (typeof errObj === 'object') {
@@ -56,23 +55,18 @@ const AddBrand = () => {
                 toast.error(errObj)
             }
 
-            // Reset form nếu lỗi
             setForm({ name: '', country: '', logo: null })
             setLogoPreview(null)
 
             dispatch(resetState())
         }
-    }, [success, error, dispatch])
-
-
-
+    }, [success, error, dispatch, navigate])
 
     return (
         <div className="max-w-xl mx-auto bg-white shadow p-6 rounded-lg">
             <h2 className="text-xl font-bold mb-4 text-gray-700">➕ Thêm thương hiệu</h2>
 
             <form onSubmit={handleSubmit} className="space-y-4">
-                {/* Tên thương hiệu */}
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Tên thương hiệu *</label>
                     <input
@@ -86,7 +80,6 @@ const AddBrand = () => {
                     />
                 </div>
 
-                {/* Quốc gia */}
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Quốc gia *</label>
                     <input
@@ -100,11 +93,16 @@ const AddBrand = () => {
                     />
                 </div>
 
-                {/* Logo */}
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Logo (≤ 2MB)</label>
                     <label className="border-2 border-dashed border-blue-400 rounded-lg p-4 text-center cursor-pointer bg-blue-50 block">
-                        <input type="file" name="logo" accept="image/*" onChange={handleChange} className="hidden" />
+                        <input
+                            type="file"
+                            name="logo"
+                            accept="image/*"
+                            onChange={handleChange}
+                            className="hidden"
+                        />
                         <div className="flex flex-col items-center justify-center text-blue-500">
                             <FaImages className="text-3xl" />
                             <span className="mt-2 text-sm">Tải lên 1 ảnh logo</span>
@@ -113,12 +111,15 @@ const AddBrand = () => {
 
                     {logoPreview && (
                         <div className="mt-2">
-                            <img src={logoPreview} alt="Logo preview" className="w-24 h-24 object-contain border rounded" />
+                            <img
+                                src={logoPreview}
+                                alt="Logo preview"
+                                className="w-24 h-24 object-contain border rounded"
+                            />
                         </div>
                     )}
                 </div>
 
-                {/* Nút submit */}
                 <div>
                     <button
                         type="submit"

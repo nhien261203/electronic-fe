@@ -4,13 +4,14 @@ import routes from './routes'
 
 import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
+import NProgressBar from './components/NProgressBar'
 
 const App = () => {
   const element = useRoutes(routes)
 
   return (
     <>
-
+      <NProgressBar />
       {/* Hiển thị thông báo toast */}
       <ToastContainer
         position="top-right"
