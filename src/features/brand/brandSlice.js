@@ -21,14 +21,15 @@ export const createBrand = createAsyncThunk(
 // Lấy danh sách brand
 export const fetchBrands = createAsyncThunk(
     'brand/fetchAll',
-    async ({ page, perPage }, { rejectWithValue }) => {
+    async ({ page, perPage, search = '', country = '' }, { rejectWithValue }) => {
         try {
-            return await fetchBrandsAPI(page, perPage)
+            return await fetchBrandsAPI(page, perPage, search, country)
         } catch (err) {
             return rejectWithValue(err.response?.data || { message: 'Lỗi tải danh sách' })
         }
     }
 )
+
 
 // Cập nhật brand
 export const updateBrand = createAsyncThunk(
