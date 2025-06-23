@@ -77,9 +77,12 @@ const BrandList = () => {
             .catch(() => toast.error('Không thể lấy danh sách quốc gia'))
     }, [])
 
-    useEffect(() => {
-        setCurrentPage(1)
-    }, [search, country])
+    // useEffect(() => {
+    //     setCurrentPage(1)
+    // }, [search, country])
+
+    
+
 
     useEffect(() => {
         setSearchParams({ page: currentPage })
@@ -178,7 +181,7 @@ const BrandList = () => {
                                     <td className="p-3 font-semibold">{brand.name}</td>
                                     <td className="p-3">{brand.slug}</td>
                                     <td className="p-3">{brand.country}</td>
-                                    <td className="p-3 flex gap-3 text-blue-600">
+                                    <td className="p-3 flex gap-3 text-blue-600 mt-5">
                                         <button
                                             onClick={() => navigate(`/admin/brands/${brand.id}?page=${currentPage}`, {
                                                 state: { brand, page: currentPage }

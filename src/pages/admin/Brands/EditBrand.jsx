@@ -49,7 +49,7 @@ const EditBrand = () => {
             toast.success('Cập nhật thương hiệu thành công!')
             navigate(`/admin/brands?page=${page}`)
         } catch (err) {
-            toast.error(err?.message || '❌ Lỗi khi cập nhật!')
+            toast.error(err?.message || 'Lỗi khi cập nhật!')
         } finally {
             setLoading(false)
         }
@@ -57,12 +57,12 @@ const EditBrand = () => {
 
     return (
         <div className="p-6 max-w-xl mx-auto font-sans">
-            <button
+            {/* <button
                 onClick={() => navigate(`/admin/brands?page=${page}`)}
                 className="mb-4 text-blue-600 hover:underline flex items-center"
             >
                 <FaArrowLeft className="mr-2" /> Quay lại danh sách
-            </button>
+            </button> */}
 
             <div className="bg-white shadow rounded p-6">
                 <h2 className="text-2xl font-bold mb-4">✏️ Cập nhật Thương hiệu</h2>
