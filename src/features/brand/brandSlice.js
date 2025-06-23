@@ -80,6 +80,15 @@ const brandSlice = createSlice({
         resetBrandList: (state) => {
             state.brands = []
             state.pagination = initialState.pagination
+        },
+        // ✅ NEW: Cập nhật danh sách brand sau khi xoá 1 phần tử
+        removeBrand: (state, action) => {
+            state.brands = state.brands.filter((b) => b.id !== action.payload)
+            state.pagination.total -= 1
+        },
+        // ✅ NEW: Cho phép cập nhật filteredTotal từ UI nếu có
+        updateFilteredTotal: (state, action) => {
+            state.filteredTotal = action.payload
         }
     },
     extraReducers: (builder) => {
@@ -152,5 +161,6 @@ const brandSlice = createSlice({
     }
 })
 
-export const { resetState, resetBrandList } = brandSlice.actions
+export const { resetState, resetBrandList, removeBrand, updateFilteredTotal } = brandSlice.actions
+
 export default brandSlice.reducer

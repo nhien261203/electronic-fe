@@ -26,6 +26,7 @@ const BrandList = () => {
 
     const [confirmOpen, setConfirmOpen] = useState(false)
     const [selectedId, setSelectedId] = useState(null)
+    const [isProcessing, setIsProcessing] = useState(false) // ✅ new
     const firstLoadRef = useRef(true)
 
     const handleSearch = (e) => setSearch(e.target.value)
@@ -41,10 +42,25 @@ const BrandList = () => {
         setConfirmOpen(true)
     }
 
-    const confirmDelete = () => {
-        dispatch(deleteBrand(selectedId)).then(() => toast.success('Đã xoá thương hiệu!'))
-        setConfirmOpen(false)
+    const confirmDelete = async () => {
+        if (isProcessing) return // ✅ Chặn ấn nhiều lần
+
+        setIsProcessing(true)
+        try {
+            await dispatch(deleteBrand(selectedId)).unwrap()
+            toast.success('Đã xoá thương hiệu!')
+
+            const res = await dispatch(fetchBrands({ page: currentPage, perPage, search, country })).unwrap()
+            setFilteredTotal(res.total)
+        } catch (err) {
+            toast.error('Lỗi xoá thương hiệu!')
+        } finally {
+            setConfirmOpen(false)
+            setIsProcessing(false) // ✅ Cho phép ấn lại khi xong
+        }
     }
+
+
 
     const debouncedFetch = useCallback(
         debounce((page, searchText, selectedCountry) => {
@@ -132,6 +148,7 @@ const BrandList = () => {
                     <> | Kết quả: <strong>{filteredTotal}</strong></>
                 )}
             </div>
+
 
             <div className="overflow-x-auto bg-white rounded shadow">
                 <table className="min-w-full text-sm">
@@ -229,8 +246,13 @@ const BrandList = () => {
                 title="Xác nhận xoá"
                 message="Bạn có chắc muốn xoá thương hiệu này?"
                 onConfirm={confirmDelete}
-                onCancel={() => setConfirmOpen(false)}
+                onCancel={() => {
+                    if (!isProcessing) setConfirmOpen(false)
+                }}
+                disabled={isProcessing}
             />
+
+
         </div>
     )
 }

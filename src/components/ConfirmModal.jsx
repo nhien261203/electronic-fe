@@ -1,7 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
 
-const ConfirmModal = ({ isOpen, title, message, onConfirm, onCancel }) => {
+const ConfirmModal = ({ isOpen, title, message, onConfirm, onCancel, disabled = false }) => {
     if (!isOpen) return null
 
     return ReactDOM.createPortal(
@@ -10,10 +10,18 @@ const ConfirmModal = ({ isOpen, title, message, onConfirm, onCancel }) => {
                 <h2 className="text-lg font-semibold mb-3 text-gray-800">{title || 'Xác nhận'}</h2>
                 <p className="mb-4 text-gray-700">{message || 'Bạn có chắc chắn không?'}</p>
                 <div className="flex justify-end gap-3">
-                    <button onClick={onCancel} className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">
+                    <button
+                        onClick={onCancel}
+                        disabled={disabled}
+                        className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50"
+                    >
                         Hủy
                     </button>
-                    <button onClick={onConfirm} className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">
+                    <button
+                        onClick={onConfirm}
+                        disabled={disabled}
+                        className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50"
+                    >
                         Đồng ý
                     </button>
                 </div>
