@@ -26,8 +26,12 @@ const BrandList = () => {
 
     const [confirmOpen, setConfirmOpen] = useState(false)
     const [selectedId, setSelectedId] = useState(null)
-    const [isProcessing, setIsProcessing] = useState(false) // ✅ new
+    const [isProcessing, setIsProcessing] = useState(false)
     const firstLoadRef = useRef(true)
+
+    // ✅ Thêm refs để track thay đổi search/filter
+    const prevSearchRef = useRef(search)
+    const prevCountryRef = useRef(country)
 
     const handleSearch = (e) => setSearch(e.target.value)
     const handleFilter = (e) => setCountry(e.target.value)
@@ -43,7 +47,7 @@ const BrandList = () => {
     }
 
     const confirmDelete = async () => {
-        if (isProcessing) return // ✅ Chặn ấn nhiều lần
+        if (isProcessing) return
 
         setIsProcessing(true)
         try {
@@ -56,11 +60,9 @@ const BrandList = () => {
             toast.error('Lỗi xoá thương hiệu!')
         } finally {
             setConfirmOpen(false)
-            setIsProcessing(false) // ✅ Cho phép ấn lại khi xong
+            setIsProcessing(false)
         }
     }
-
-
 
     const debouncedFetch = useCallback(
         debounce((page, searchText, selectedCountry) => {
@@ -77,12 +79,19 @@ const BrandList = () => {
             .catch(() => toast.error('Không thể lấy danh sách quốc gia'))
     }, [])
 
-    // useEffect(() => {
-    //     setCurrentPage(1)
-    // }, [search, country])
+    // Chỉ reset trang khi search/filter thực sự thay đổi (không phải lần đầu load)
+    useEffect(() => {
+        const searchChanged = prevSearchRef.current !== search
+        const countryChanged = prevCountryRef.current !== country
 
-    
+        if (!firstLoadRef.current && (searchChanged || countryChanged)) {
+            setCurrentPage(1)
+        }
 
+        // Cập nhật previous values
+        prevSearchRef.current = search
+        prevCountryRef.current = country
+    }, [search, country])
 
     useEffect(() => {
         setSearchParams({ page: currentPage })
@@ -152,7 +161,6 @@ const BrandList = () => {
                 )}
             </div>
 
-
             <div className="overflow-x-auto bg-white rounded shadow">
                 <table className="min-w-full text-sm">
                     <thead className="bg-gray-100 text-gray-700">
@@ -181,31 +189,33 @@ const BrandList = () => {
                                     <td className="p-3 font-semibold">{brand.name}</td>
                                     <td className="p-3">{brand.slug}</td>
                                     <td className="p-3">{brand.country}</td>
-                                    <td className="p-3 flex gap-3 text-blue-600 mt-5">
-                                        <button
-                                            onClick={() => navigate(`/admin/brands/${brand.id}?page=${currentPage}`, {
-                                                state: { brand, page: currentPage }
-                                            })
-                                            }
-                                            title="Chi tiết"
-                                            className="hover:text-blue-700"
-                                        >
-                                            <FaEye />
-                                        </button>
-                                        <button
-                                            onClick={() => navigate(`/admin/brands/edit/${brand.id}?page=${currentPage}`, { state: { brand } })}
-                                            title="Chỉnh sửa"
-                                            className="text-yellow-500 hover:text-yellow-600"
-                                        >
-                                            <FaEdit />
-                                        </button>
-                                        <button
-                                            onClick={() => openDeleteModal(brand.id)}
-                                            title="Xoá"
-                                            className="text-red-500 hover:text-red-600"
-                                        >
-                                            <FaTrash />
-                                        </button>
+                                    <td className="p-3 ">
+                                        <div className='flex gap-3 text-blue-600'>
+                                            <button
+                                                onClick={() => navigate(`/admin/brands/${brand.id}?page=${currentPage}`, {
+                                                    state: { brand, page: currentPage }
+                                                })}
+                                                title="Chi tiết"
+                                                className="hover:text-blue-700"
+                                            >
+                                                <FaEye />
+                                            </button>
+                                            <button
+                                                onClick={() => navigate(`/admin/brands/edit/${brand.id}?page=${currentPage}`, { state: { brand } })}
+                                                title="Chỉnh sửa"
+                                                className="text-yellow-500 hover:text-yellow-600"
+                                            >
+                                                <FaEdit />
+                                            </button>
+                                            <button
+                                                onClick={() => openDeleteModal(brand.id)}
+                                                title="Xoá"
+                                                className="text-red-500 hover:text-red-600"
+                                            >
+                                                <FaTrash />
+                                            </button>
+                                        </div>
+
                                     </td>
                                 </tr>
                             ))
@@ -254,8 +264,6 @@ const BrandList = () => {
                 }}
                 disabled={isProcessing}
             />
-
-
         </div>
     )
 }
