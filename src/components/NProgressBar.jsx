@@ -4,7 +4,7 @@ import { useSelector } from 'react-redux'
 import NProgress from 'nprogress'
 import 'nprogress/nprogress.css'
 
-NProgress.configure({ showSpinner: false, trickleSpeed: 70 })
+NProgress.configure({ showSpinner: false, trickleSpeed: 50 })
 
 const NProgressBar = () => {
     const { loading } = useSelector((state) => state.brand)

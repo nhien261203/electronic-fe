@@ -7,7 +7,12 @@ const BrandDetail = () => {
     const { id } = useParams()
     const navigate = useNavigate()
     const location = useLocation()
-    const page = new URLSearchParams(location.search).get('page') || 1
+    
+    console.log('🔍 location.state:', location.state) // Thêm dòng này
+
+
+    const page = location.state?.page || 1
+    
 
     const [brand, setBrand] = useState(location.state?.brand || null)
     const [error, setError] = useState(null)
@@ -18,7 +23,7 @@ const BrandDetail = () => {
 
         axios
             .get(`http://localhost:8000/api/brands/${id}`)
-            .then(res => {
+            .then((res) => {
                 setBrand(res.data.data)
                 setLoading(false)
             })
