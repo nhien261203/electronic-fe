@@ -11,44 +11,50 @@ const EditCategory = () => {
     const categoryFromState = location.state?.category
     const page = new URLSearchParams(location.search).get('page') || 1
 
-    const [form, setForm] = useState({ name: '', parent_id: '' })
+    const [form, setForm] = useState({
+        name: categoryFromState?.name || '',
+        parent_id: categoryFromState?.parent_id || '',
+        status: String(categoryFromState?.status ?? '1')
+    })
+
     const [categories, setCategories] = useState([])
-    const [formLoading, setFormLoading] = useState(!categoryFromState)
-    const [categoriesLoading, setCategoriesLoading] = useState(true)
+    const [loadingCategories, setLoadingCategories] = useState(true)
 
     useEffect(() => {
-        const fetchFormAndCategories = async () => {
-            try {
-                if (!categoryFromState) {
-                    const res = await axios.get(`http://localhost:8000/api/categories/${id}`)
-                    const data = res.data?.data
-                    setForm({
-                        name: data.name,
-                        parent_id: data.parent_id || '',
-                    })
-                } else {
-                    setForm({
-                        name: categoryFromState.name,
-                        parent_id: categoryFromState.parent_id || '',
-                    })
-                }
-                setFormLoading(false)
-            } catch {
-                toast.error('❌ Không tìm thấy danh mục!')
-                setFormLoading(false)
-            }
+        let mounted = true
 
-            try {
-                const resList = await axios.get(`http://localhost:8000/api/categories?per_page=100`)
-                setCategories(resList.data?.data || [])
-            } catch {
-                toast.error('❌ Lỗi tải danh mục cha!')
-            } finally {
-                setCategoriesLoading(false)
+        const fetchCategoryIfNeeded = async () => {
+            if (!categoryFromState) {
+                try {
+                    const res = await axios.get(`http://localhost:8000/api/categories/${id}`)
+                    const data = res.data.data
+                    if (mounted) {
+                        setForm({
+                            name: data.name,
+                            parent_id: data.parent_id || '',
+                            status: String(data.status)
+                        })
+                    }
+                } catch {
+                    toast.error('❌ Không tìm thấy danh mục!')
+                }
             }
         }
 
-        fetchFormAndCategories()
+        const fetchCategories = async () => {
+            try {
+                const res = await axios.get('http://localhost:8000/api/categories?per_page=100')
+                if (mounted) setCategories(res.data.data || [])
+            } catch {
+                toast.error('❌ Lỗi tải danh mục cha!')
+            } finally {
+                setLoadingCategories(false)
+            }
+        }
+
+        fetchCategoryIfNeeded()
+        fetchCategories()
+        return () => { mounted = false }
     }, [id, categoryFromState])
 
     const handleSubmit = async (e) => {
@@ -57,21 +63,13 @@ const EditCategory = () => {
             await axios.put(`http://localhost:8000/api/categories/${id}`, {
                 name: form.name,
                 parent_id: form.parent_id || null,
+                status: Number(form.status)
             })
             toast.success('✅ Cập nhật danh mục thành công!')
-            navigate(`/admin/categories?page=${page}`)
+            navigate(`/admin/categories?page=${page}`, { replace: true })
         } catch {
             toast.error('❌ Lỗi khi cập nhật danh mục!')
         }
-    }
-
-    // ✅ Hiển thị loading mượt
-    if (formLoading || categoriesLoading) {
-        return (
-            <div className="p-6 text-blue-600 font-sans">
-                
-            </div>
-        )
     }
 
     return (
@@ -96,6 +94,7 @@ const EditCategory = () => {
                             value={form.parent_id}
                             onChange={(e) => setForm({ ...form, parent_id: e.target.value })}
                             className="w-full px-3 py-2 border rounded"
+                            disabled={loadingCategories}
                         >
                             <option value="">-- Không chọn (Gốc) --</option>
                             {categories
@@ -108,16 +107,30 @@ const EditCategory = () => {
                         </select>
                     </div>
 
+                    <div>
+                        <label className="block mb-1 font-medium">Trạng thái</label>
+                        <select
+                            value={form.status}
+                            onChange={(e) => setForm({ ...form, status: e.target.value })}
+                            className="w-full px-3 py-2 border rounded"
+                        >
+                            <option value="1">Hoạt động</option>
+                            <option value="0">Tạm ẩn</option>
+                        </select>
+                    </div>
+
                     <div className="flex gap-2">
                         <button
                             type="submit"
                             className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
                         >
-                            ✅ Cập nhật
+                            Cập nhật
                         </button>
                         <button
                             type="button"
-                            onClick={() => navigate(`/admin/categories?page=${page}`)}
+                            onClick={() =>
+                                navigate(`/admin/categories?page=${page}`, { replace: true })
+                            }
                             className="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400"
                         >
                             Hủy

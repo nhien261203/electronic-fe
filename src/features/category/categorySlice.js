@@ -12,7 +12,7 @@ export const fetchCategories = createAsyncThunk(
     'category/fetchAll',
     async (params, { rejectWithValue }) => {
         try {
-            return await fetchCategoriesAPI(params)
+            return await fetchCategoriesAPI(params) // ✅ params có thể chứa search + status
         } catch (err) {
             return rejectWithValue(err.response?.data || err.message)
         }
@@ -34,7 +34,7 @@ export const createCategory = createAsyncThunk(
     'category/create',
     async (data, { rejectWithValue }) => {
         try {
-            return await createCategoryAPI(data)
+            return await createCategoryAPI(data) // ✅ data có thể chứa status
         } catch (err) {
             return rejectWithValue(err.response?.data || err.message)
         }
@@ -45,7 +45,7 @@ export const updateCategory = createAsyncThunk(
     'category/update',
     async ({ id, data }, { rejectWithValue }) => {
         try {
-            return await updateCategoryAPI(id, data)
+            return await updateCategoryAPI(id, data) // ✅ data có thể chứa status
         } catch (err) {
             return rejectWithValue(err.response?.data || err.message)
         }
@@ -81,7 +81,7 @@ const categorySlice = createSlice({
     },
     extraReducers: (builder) => {
         builder
-            // Fetch all
+            // 🔄 Fetch all
             .addCase(fetchCategories.pending, (state) => {
                 state.loading = true
                 state.error = null
@@ -100,12 +100,12 @@ const categorySlice = createSlice({
                 state.error = action.payload
             })
 
-            // Fetch one
+            // 🔍 Fetch one
             .addCase(fetchCategory.fulfilled, (state, action) => {
                 state.category = action.payload
             })
 
-            // Create
+            // ➕ Create
             .addCase(createCategory.pending, (state) => {
                 state.success = false
             })
@@ -117,7 +117,7 @@ const categorySlice = createSlice({
                 state.success = false
             })
 
-            // Update
+            // ✏️ Update
             .addCase(updateCategory.pending, (state) => {
                 state.success = false
             })
@@ -129,7 +129,7 @@ const categorySlice = createSlice({
                 state.success = false
             })
 
-            // Delete
+            // ❌ Delete
             .addCase(deleteCategory.fulfilled, (state) => {
                 state.success = true
             })

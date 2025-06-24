@@ -12,7 +12,8 @@ const AddCategory = () => {
 
   const [form, setForm] = useState({
     name: '',
-    parent_id: ''
+    parent_id: '',
+    status: '1' // ✅ mặc định là hoạt động
   })
   const [categories, setCategories] = useState([])
 
@@ -35,14 +36,15 @@ const AddCategory = () => {
     e.preventDefault()
     const formData = {
       name: form.name,
-      parent_id: form.parent_id || null
+      parent_id: form.parent_id || null,
+      status: Number(form.status) // ✅ gửi đúng kiểu số
     }
     dispatch(createCategory(formData))
   }
 
   useEffect(() => {
     if (success) {
-      toast.success('Thêm danh mục thành công!')
+      toast.success('✅ Thêm danh mục thành công!')
       dispatch(resetState())
       navigate('/admin/categories')
     }
@@ -89,6 +91,20 @@ const AddCategory = () => {
                 {c.name}
               </option>
             ))}
+          </select>
+        </div>
+
+        {/* ✅ Thêm phần chọn trạng thái */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Trạng thái</label>
+          <select
+            name="status"
+            value={form.status}
+            onChange={handleChange}
+            className="w-full px-4 py-2 border rounded"
+          >
+            <option value="1">Hoạt động</option>
+            <option value="0">Tạm ẩn</option>
           </select>
         </div>
 

@@ -9,29 +9,26 @@ const CategoryDetail = () => {
     const navigate = useNavigate()
     const location = useLocation()
 
-    const page = location.state?.page || 1
     const [category, setCategory] = useState(location.state?.category || null)
     const [loading, setLoading] = useState(!category)
     const [error, setError] = useState(null)
 
     useEffect(() => {
-        if (category && loading) {
-            setLoading(false)
-            return
-        }
+        if (category) return
 
-        if (!category) {
-            axios.get(`http://localhost:8000/api/categories/${id}`)
-                .then((res) => {
-                    setCategory(res.data.data)
-                    setLoading(false)
-                })
-                .catch(() => {
-                    setError('❌ Không tìm thấy danh mục.')
-                    setLoading(false)
-                })
-        }
-    }, [id, category, loading])
+        setLoading(true)
+        axios
+            .get(`http://localhost:8000/api/categories/${id}`)
+            .then((res) => {
+                setCategory(res.data.data)
+            })
+            .catch(() => {
+                setError('❌ Không tìm thấy danh mục.')
+            })
+            .finally(() => {
+                setLoading(false)
+            })
+    }, [id, category])
 
     if (loading) return <div className="p-6 text-blue-600">⏳ Đang tải dữ liệu...</div>
     if (error) return <div className="p-6 text-red-600">{error}</div>
@@ -39,7 +36,7 @@ const CategoryDetail = () => {
     return (
         <div className="p-6 font-sans">
             <button
-                onClick={() => navigate(`/admin/categories?page=${page}`, { replace: true })}
+                onClick={() => navigate(-1)}
                 className="mb-4 text-blue-600 hover:underline flex items-center"
             >
                 <FaArrowLeft className="mr-2" />
@@ -54,7 +51,16 @@ const CategoryDetail = () => {
                     <div><strong>Tên:</strong> {category.name}</div>
                     <div><strong>Slug:</strong> {category.slug}</div>
                     <div><strong>Danh mục cha:</strong> {category.parent?.name || 'Gốc'}</div>
-                    <div><strong>Ngày tạo:</strong> {dayjs(category.created_at).format('DD/MM/YYYY HH:mm')}</div>
+                    <div>
+                        <strong>Trạng thái:</strong>{' '}
+                        <span className={category.status === 1 ? 'text-green-600' : 'text-gray-500'}>
+                            {category.status === 1 ? 'Hoạt động' : 'Tạm ẩn'}
+                        </span>
+                    </div>
+                    <div>
+                        <strong>Ngày tạo:</strong>{' '}
+                        {dayjs(category.created_at).format('DD/MM/YYYY HH:mm')}
+                    </div>
                 </div>
             </div>
         </div>

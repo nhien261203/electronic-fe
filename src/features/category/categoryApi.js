@@ -1,4 +1,3 @@
-// src/features/category/categoryAPI.js
 import axios from 'axios'
 
 const API_URL = 'http://localhost:8000/api/categories'
@@ -8,9 +7,10 @@ const headers = {
     Accept: 'application/json',
 }
 
-export const fetchCategoriesAPI = async ({ page = 1, perPage = 10, search = '' }) => {
+// Thêm param `status` vào filter
+export const fetchCategoriesAPI = async ({ page = 1, perPage = 10, search = '', status = '' }) => {
     const res = await axios.get(API_URL, {
-        params: { page, per_page: perPage, search },
+        params: { page, per_page: perPage, search, status },
         headers,
     })
     return res.data
@@ -21,6 +21,7 @@ export const fetchCategoryAPI = async (id) => {
     return res.data.data
 }
 
+// create và update đều có thể chứa `status`
 export const createCategoryAPI = async (data) => {
     const res = await axios.post(API_URL, data, { headers })
     return res.data.data
