@@ -120,6 +120,13 @@ const EditBrand = () => {
                     >
                         {loading ? 'Đang lưu...' : 'Lưu thay đổi'}
                     </button>
+                    <button
+                        type="button"
+                        onClick={() => navigate(`/admin/brands?page=${page}`)}
+                        className="px-5 py-2 mx-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400"
+                    >
+                        Hủy
+                    </button>
                 </form>
             </div>
         </div>

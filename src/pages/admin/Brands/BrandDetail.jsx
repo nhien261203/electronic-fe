@@ -8,7 +8,7 @@ const BrandDetail = () => {
     const navigate = useNavigate()
     const location = useLocation()
     
-    console.log('🔍 location.state:', location.state) // Thêm dòng này
+    //console.log('location.state:', location.state) // Thêm dòng này
 
 
     const page = location.state?.page || 1
