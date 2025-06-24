@@ -11,7 +11,7 @@ const App = () => {
 
   return (
     <>
-      {/* <NProgressBar /> */}
+      <NProgressBar /> 
       {/* Hiển thị thông báo toast */}
       <ToastContainer
         position="top-right"

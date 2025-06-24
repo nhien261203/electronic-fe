@@ -4,22 +4,24 @@ import { useSelector } from 'react-redux'
 import NProgress from 'nprogress'
 import 'nprogress/nprogress.css'
 
-NProgress.configure({ showSpinner: false, trickleSpeed: 10 })
+NProgress.configure({ showSpinner: false, trickleSpeed: 40 })
 
 const NProgressBar = () => {
-    const { loading } = useSelector((state) => state.brand)
+    const brandLoading = useSelector((state) => state.brand.loading)
+    const categoryLoading = useSelector((state) => state.category.loading)
+    const loading = brandLoading || categoryLoading
+
     const location = useLocation()
     const mounted = useRef(false)
 
     useEffect(() => {
-        // Reset mounted flag mỗi khi route thay đổi
         mounted.current = false
     }, [location.pathname])
 
     useEffect(() => {
         if (!mounted.current) {
             mounted.current = true
-            return // ❌ Bỏ qua lần đầu mỗi khi vào route mới
+            return
         }
 
         if (loading) {

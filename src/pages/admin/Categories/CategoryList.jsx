@@ -20,7 +20,7 @@ const CategoryList = () => {
         (state) => state.category
     )
 
-    const perPage = 4
+    const perPage = 8
     const [searchParams, setSearchParams] = useSearchParams()
     const pageParam = parseInt(searchParams.get('page')) || 1
     const [currentPage, setCurrentPage] = useState(pageParam)
