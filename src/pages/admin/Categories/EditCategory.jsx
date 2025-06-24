@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import axios from 'axios'
 import { toast } from 'react-toastify'
-import { FaArrowLeft } from 'react-icons/fa'
 
 const EditCategory = () => {
     const { id } = useParams()
@@ -14,12 +13,12 @@ const EditCategory = () => {
 
     const [form, setForm] = useState({ name: '', parent_id: '' })
     const [categories, setCategories] = useState([])
-    const [loading, setLoading] = useState(!categoryFromState) // ⏳ Chỉ loading nếu chưa có sẵn
+    const [formLoading, setFormLoading] = useState(!categoryFromState)
+    const [categoriesLoading, setCategoriesLoading] = useState(true)
 
     useEffect(() => {
-        const fetchCategory = async () => {
+        const fetchFormAndCategories = async () => {
             try {
-                // Nếu chưa có category trong state thì gọi API
                 if (!categoryFromState) {
                     const res = await axios.get(`http://localhost:8000/api/categories/${id}`)
                     const data = res.data?.data
@@ -28,24 +27,28 @@ const EditCategory = () => {
                         parent_id: data.parent_id || '',
                     })
                 } else {
-                    // Có sẵn trong state thì set luôn
                     setForm({
                         name: categoryFromState.name,
                         parent_id: categoryFromState.parent_id || '',
                     })
                 }
+                setFormLoading(false)
+            } catch {
+                toast.error('❌ Không tìm thấy danh mục!')
+                setFormLoading(false)
+            }
 
-                // Lấy danh sách categories (dù có hay không)
+            try {
                 const resList = await axios.get(`http://localhost:8000/api/categories?per_page=100`)
                 setCategories(resList.data?.data || [])
-            } catch (err) {
-                toast.error('❌ Không tìm thấy danh mục hoặc lỗi khi tải!')
+            } catch {
+                toast.error('❌ Lỗi tải danh mục cha!')
             } finally {
-                setLoading(false)
+                setCategoriesLoading(false)
             }
         }
 
-        fetchCategory()
+        fetchFormAndCategories()
     }, [id, categoryFromState])
 
     const handleSubmit = async (e) => {
@@ -55,17 +58,21 @@ const EditCategory = () => {
                 name: form.name,
                 parent_id: form.parent_id || null,
             })
-
             toast.success('✅ Cập nhật danh mục thành công!')
             navigate(`/admin/categories?page=${page}`)
-        } catch (err) {
+        } catch {
             toast.error('❌ Lỗi khi cập nhật danh mục!')
         }
     }
 
-    // if (loading) {
-    //     return <div className="p-6 text-blue-600">⏳ Đang tải dữ liệu...</div>
-    // }
+    // ✅ Hiển thị loading mượt
+    if (formLoading || categoriesLoading) {
+        return (
+            <div className="p-6 text-blue-600 font-sans">
+                
+            </div>
+        )
+    }
 
     return (
         <div className="p-6 max-w-xl mx-auto font-sans">
@@ -106,7 +113,7 @@ const EditCategory = () => {
                             type="submit"
                             className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
                         >
-                            Cập nhật
+                            ✅ Cập nhật
                         </button>
                         <button
                             type="button"

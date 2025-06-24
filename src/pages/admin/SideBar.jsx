@@ -54,7 +54,7 @@ const SideBar = ({ collapsed, isMobile }) => {
                     </FadeInWhenVisible>
 
                     <SidebarLink to="products" icon={<FaThList />} label="Sản phẩm" collapsed={collapsed} />
-                    <SidebarLink icon={<FaBoxes />} label="Danh mục" collapsed={collapsed} />
+                    <SidebarLink to="categories" icon={<FaBoxes />} label="Danh mục" collapsed={collapsed} />
                     <SidebarLink to="brands" icon={<FaTags />} label="Thương hiệu" collapsed={collapsed} />
                     <SidebarLink icon={<FaImage />} label="Hình ảnh" collapsed={collapsed} />
                     <SidebarLink icon={<FaImage />} label="Slider" collapsed={collapsed} />
