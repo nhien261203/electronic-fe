@@ -10,7 +10,12 @@ const AddBrand = () => {
     const navigate = useNavigate()
     const { loading, success, error } = useSelector((state) => state.brand)
 
-    const [form, setForm] = useState({ name: '', country: '', logo: null })
+    const [form, setForm] = useState({
+        name: '',
+        country: '',
+        logo: null,
+        status: '1', // ✅ default: hoạt động
+    })
     const [logoPreview, setLogoPreview] = useState(null)
 
     const handleChange = (e) => {
@@ -34,6 +39,7 @@ const AddBrand = () => {
         const formData = new FormData()
         formData.append('name', form.name)
         formData.append('country', form.country)
+        formData.append('status', form.status)
         if (form.logo) formData.append('logo', form.logo)
 
         dispatch(createBrand(formData))
@@ -43,21 +49,19 @@ const AddBrand = () => {
         if (success) {
             toast.success('Thêm thương hiệu thành công!')
             dispatch(resetState())
-            navigate('/admin/brands') // ✅ Điều hướng sau khi thêm
+            navigate('/admin/brands')
         }
 
         if (error) {
             const errObj = error.errors ?? error
-
             if (typeof errObj === 'object') {
                 Object.values(errObj).flat().forEach((msg) => toast.error(msg))
             } else {
                 toast.error(errObj)
             }
 
-            setForm({ name: '', country: '', logo: null })
+            setForm({ name: '', country: '', logo: null, status: '1' })
             setLogoPreview(null)
-
             dispatch(resetState())
         }
     }, [success, error, dispatch, navigate])
@@ -91,6 +95,20 @@ const AddBrand = () => {
                         className="w-full px-4 py-2 border rounded"
                         placeholder="Ví dụ: Hàn Quốc, Mỹ..."
                     />
+                </div>
+
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Trạng thái *</label>
+                    <select
+                        name="status"
+                        value={form.status}
+                        onChange={handleChange}
+                        required
+                        className="w-full px-4 py-2 border rounded"
+                    >
+                        <option value="1">Hoạt động</option>
+                        <option value="0">Tạm ẩn</option>
+                    </select>
                 </div>
 
                 <div>

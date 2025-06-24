@@ -18,18 +18,17 @@ export const createBrand = createAsyncThunk(
     }
 )
 
-// Lấy danh sách brand
+// Lấy danh sách brand (có thể lọc theo status)
 export const fetchBrands = createAsyncThunk(
     'brand/fetchAll',
-    async ({ page, perPage, search = '', country = '' }, { rejectWithValue }) => {
+    async ({ page, perPage, search = '', country = '', status = '' }, { rejectWithValue }) => {
         try {
-            return await fetchBrandsAPI(page, perPage, search, country)
+            return await fetchBrandsAPI(page, perPage, search, country, status)
         } catch (err) {
             return rejectWithValue(err.response?.data || { message: 'Lỗi tải danh sách' })
         }
     }
 )
-
 
 // Cập nhật brand
 export const updateBrand = createAsyncThunk(
@@ -65,7 +64,8 @@ const initialState = {
     },
     loading: false,
     success: false,
-    error: null
+    error: null,
+    filteredTotal: null // ✅ để hỗ trợ hiển thị kết quả tìm kiếm
 }
 
 const brandSlice = createSlice({
@@ -81,20 +81,17 @@ const brandSlice = createSlice({
             state.brands = []
             state.pagination = initialState.pagination
         },
-        // ✅ NEW: Cập nhật danh sách brand sau khi xoá 1 phần tử
         removeBrand: (state, action) => {
             state.brands = state.brands.filter((b) => b.id !== action.payload)
             state.pagination.total -= 1
         },
-        // ✅ NEW: Cho phép cập nhật filteredTotal từ UI nếu có
         updateFilteredTotal: (state, action) => {
             state.filteredTotal = action.payload
         }
     },
     extraReducers: (builder) => {
         builder
-
-            // Create brand
+            // Create
             .addCase(createBrand.pending, (state) => {
                 state.loading = true
                 state.success = false
@@ -109,7 +106,7 @@ const brandSlice = createSlice({
                 state.error = action.payload?.errors || { message: action.payload?.message }
             })
 
-            // Fetch brands
+            // Fetch
             .addCase(fetchBrands.pending, (state) => {
                 state.loading = true
                 state.error = null
@@ -129,7 +126,7 @@ const brandSlice = createSlice({
                 state.error = action.payload?.errors || { message: action.payload?.message }
             })
 
-            // Update brand
+            // Update
             .addCase(updateBrand.pending, (state) => {
                 state.loading = true
                 state.success = false
@@ -144,7 +141,7 @@ const brandSlice = createSlice({
                 state.error = action.payload?.errors || { message: action.payload?.message }
             })
 
-            // Delete brand
+            // Delete
             .addCase(deleteBrand.pending, (state) => {
                 state.loading = true
                 state.success = false

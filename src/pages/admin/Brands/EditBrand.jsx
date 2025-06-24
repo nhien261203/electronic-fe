@@ -15,19 +15,35 @@ const EditBrand = () => {
     const brandFromState = location.state?.brand
     const page = new URLSearchParams(location.search).get('page') || 1
 
-    const [form, setForm] = useState({ name: '', country: '', logo: null })
+    const [form, setForm] = useState({
+        name: '',
+        country: '',
+        logo: null,
+        status: '1'
+    })
     const [preview, setPreview] = useState(null)
     const [loading, setLoading] = useState(false)
 
     useEffect(() => {
         if (brandFromState) {
-            setForm(brandFromState)
+            setForm({
+                name: brandFromState.name,
+                country: brandFromState.country || '',
+                status: String(brandFromState.status),
+                logo: null // mặc định không thay ảnh
+            })
             setPreview(`http://localhost:8000${brandFromState.logo}`)
         } else {
             axios.get(`http://localhost:8000/api/brands/${id}`)
                 .then(res => {
-                    setForm(res.data.data)
-                    setPreview(`http://localhost:8000${res.data.data.logo}`)
+                    const data = res.data.data
+                    setForm({
+                        name: data.name,
+                        country: data.country || '',
+                        status: String(data.status),
+                        logo: null
+                    })
+                    setPreview(`http://localhost:8000${data.logo}`)
                 })
                 .catch(() => toast.error('Không tìm thấy thương hiệu'))
         }
@@ -38,7 +54,8 @@ const EditBrand = () => {
 
         const formData = new FormData()
         formData.append('name', form.name)
-        formData.append('country', form.country || '')
+        formData.append('country', form.country)
+        formData.append('status', form.status)
         if (form.logo instanceof File) {
             formData.append('logo', form.logo)
         }
@@ -57,13 +74,6 @@ const EditBrand = () => {
 
     return (
         <div className="p-6 max-w-xl mx-auto font-sans">
-            {/* <button
-                onClick={() => navigate(`/admin/brands?page=${page}`)}
-                className="mb-4 text-blue-600 hover:underline flex items-center"
-            >
-                <FaArrowLeft className="mr-2" /> Quay lại danh sách
-            </button> */}
-
             <div className="bg-white shadow rounded p-6">
                 <h2 className="text-2xl font-bold mb-4">✏️ Cập nhật Thương hiệu</h2>
 
@@ -76,7 +86,7 @@ const EditBrand = () => {
                             type="text"
                             value={form.name}
                             onChange={(e) => setForm({ ...form, name: e.target.value })}
-                            className="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-500"
+                            className="w-full border rounded px-3 py-2"
                             required
                         />
                     </div>
@@ -85,10 +95,22 @@ const EditBrand = () => {
                         <label className="block font-medium">Quốc gia</label>
                         <input
                             type="text"
-                            value={form.country || ''}
+                            value={form.country}
                             onChange={(e) => setForm({ ...form, country: e.target.value })}
-                            className="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-500"
+                            className="w-full border rounded px-3 py-2"
                         />
+                    </div>
+
+                    <div>
+                        <label className="block font-medium">Trạng thái *</label>
+                        <select
+                            value={form.status}
+                            onChange={(e) => setForm({ ...form, status: e.target.value })}
+                            className="w-full border rounded px-3 py-2"
+                        >
+                            <option value="1">Hoạt động</option>
+                            <option value="0">Tạm ẩn</option>
+                        </select>
                     </div>
 
                     <div>
@@ -113,20 +135,22 @@ const EditBrand = () => {
                         )}
                     </div>
 
-                    <button
-                        type="submit"
-                        disabled={loading}
-                        className="px-5 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-60"
-                    >
-                        {loading ? 'Đang lưu...' : 'Lưu thay đổi'}
-                    </button>
-                    <button
-                        type="button"
-                        onClick={() => navigate(`/admin/brands?page=${page}`)}
-                        className="px-5 py-2 mx-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400"
-                    >
-                        Hủy
-                    </button>
+                    <div className="flex gap-2">
+                        <button
+                            type="submit"
+                            disabled={loading}
+                            className="px-5 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-60"
+                        >
+                            {loading ? 'Đang lưu...' : 'Lưu thay đổi'}
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => navigate(`/admin/brands?page=${page}`)}
+                            className="px-5 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400"
+                        >
+                            Hủy
+                        </button>
+                    </div>
                 </form>
             </div>
         </div>

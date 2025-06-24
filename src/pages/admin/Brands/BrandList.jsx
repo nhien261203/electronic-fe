@@ -1,3 +1,4 @@
+// 👉 phần import không đổi
 import React, { useEffect, useState, useCallback, useRef } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate, useSearchParams } from 'react-router-dom'
@@ -21,6 +22,7 @@ const BrandList = () => {
     const [currentPage, setCurrentPage] = useState(pageParam)
     const [search, setSearch] = useState('')
     const [country, setCountry] = useState('')
+    const [status, setStatus] = useState('') // ✅ NEW
     const [filteredTotal, setFilteredTotal] = useState(null)
     const [countries, setCountries] = useState([])
 
@@ -29,15 +31,18 @@ const BrandList = () => {
     const [isProcessing, setIsProcessing] = useState(false)
     const firstLoadRef = useRef(true)
 
-    // ✅ Thêm refs để track thay đổi search/filter
     const prevSearchRef = useRef(search)
     const prevCountryRef = useRef(country)
+    const prevStatusRef = useRef(status) // NEW
 
     const handleSearch = (e) => setSearch(e.target.value)
     const handleFilter = (e) => setCountry(e.target.value)
+    const handleStatusChange = (e) => setStatus(e.target.value)
+
     const resetFilters = () => {
         setSearch('')
         setCountry('')
+        setStatus('') // Reset status
         setCurrentPage(1)
     }
 
@@ -53,10 +58,9 @@ const BrandList = () => {
         try {
             await dispatch(deleteBrand(selectedId)).unwrap()
             toast.success('Đã xoá thương hiệu!')
-
-            const res = await dispatch(fetchBrands({ page: currentPage, perPage, search, country })).unwrap()
+            const res = await dispatch(fetchBrands({ page: currentPage, perPage, search, country, status })).unwrap()
             setFilteredTotal(res.total)
-        } catch (err) {
+        } catch {
             toast.error('Lỗi xoá thương hiệu!')
         } finally {
             setConfirmOpen(false)
@@ -65,8 +69,8 @@ const BrandList = () => {
     }
 
     const debouncedFetch = useCallback(
-        debounce((page, searchText, selectedCountry) => {
-            dispatch(fetchBrands({ page, perPage, search: searchText, country: selectedCountry }))
+        debounce((page, searchText, selectedCountry, selectedStatus) => {
+            dispatch(fetchBrands({ page, perPage, search: searchText, country: selectedCountry, status: selectedStatus }))
                 .unwrap()
                 .then((res) => setFilteredTotal(res.total))
         }, 300),
@@ -79,39 +83,39 @@ const BrandList = () => {
             .catch(() => toast.error('Không thể lấy danh sách quốc gia'))
     }, [])
 
-    // Chỉ reset trang khi search/filter thực sự thay đổi (không phải lần đầu load)
     useEffect(() => {
         const searchChanged = prevSearchRef.current !== search
         const countryChanged = prevCountryRef.current !== country
+        const statusChanged = prevStatusRef.current !== status
 
-        if (!firstLoadRef.current && (searchChanged || countryChanged)) {
+        if (!firstLoadRef.current && (searchChanged || countryChanged || statusChanged)) {
             setCurrentPage(1)
         }
 
-        // Cập nhật previous values
         prevSearchRef.current = search
         prevCountryRef.current = country
-    }, [search, country])
+        prevStatusRef.current = status
+    }, [search, country, status])
 
     useEffect(() => {
         setSearchParams({ page: currentPage })
 
         if (firstLoadRef.current) {
-            dispatch(fetchBrands({ page: currentPage, perPage, search, country }))
+            dispatch(fetchBrands({ page: currentPage, perPage, search, country, status }))
                 .unwrap()
                 .then((res) => setFilteredTotal(res.total))
             firstLoadRef.current = false
         } else {
-            debouncedFetch(currentPage, search, country)
+            debouncedFetch(currentPage, search, country, status)
         }
 
         return () => debouncedFetch.cancel()
-    }, [currentPage, search, country])
+    }, [currentPage, search, country, status])
 
     useEffect(() => {
         if (error) toast.error(error.message || 'Lỗi xảy ra!')
         if (success) {
-            dispatch(fetchBrands({ page: currentPage, perPage, search, country }))
+            dispatch(fetchBrands({ page: currentPage, perPage, search, country, status }))
         }
         return () => dispatch(resetState())
     }, [error, success, dispatch, currentPage])
@@ -128,7 +132,8 @@ const BrandList = () => {
                 </button>
             </div>
 
-            <div className="flex flex-col md:flex-row md:items-center gap-3 mb-4">
+            {/* --- Filter section --- */}
+            <div className="flex flex-col md:flex-row md:items-center gap-3 mb-4 flex-wrap">
                 <input
                     type="text"
                     placeholder="🔍 Tìm theo tên..."
@@ -146,6 +151,18 @@ const BrandList = () => {
                         <option key={idx} value={c}>{c}</option>
                     ))}
                 </select>
+
+                {/* ✅ Bộ lọc theo trạng thái */}
+                <select
+                    value={status}
+                    onChange={handleStatusChange}
+                    className="px-3 py-2 border rounded w-full md:w-1/5"
+                >
+                    <option value="">-- Trạng thái --</option>
+                    <option value="1">Hoạt động</option>
+                    <option value="0">Tạm ẩn</option>
+                </select>
+
                 <button
                     onClick={resetFilters}
                     className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
@@ -169,6 +186,7 @@ const BrandList = () => {
                             <th className="p-3 text-left">Tên</th>
                             <th className="p-3 text-left">Slug</th>
                             <th className="p-3 text-left">Quốc gia</th>
+                            <th className="p-3 text-left">Trạng thái</th>
                             <th className="p-3 text-left">Hành động</th>
                         </tr>
                     </thead>
@@ -189,7 +207,14 @@ const BrandList = () => {
                                     <td className="p-3 font-semibold">{brand.name}</td>
                                     <td className="p-3">{brand.slug}</td>
                                     <td className="p-3">{brand.country}</td>
-                                    <td className="p-3 ">
+                                    <td className="p-3">
+                                        <span className={`px-2 py-1 rounded text-xs font-semibold 
+                                            ${brand.status === 1 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                                            {brand.status === 1 ? 'Hoạt động' : 'Tạm ẩn'}
+                                        </span>
+                                    </td>
+
+                                    <td className="p-3">
                                         <div className='flex gap-3 text-blue-600'>
                                             <button
                                                 onClick={() => navigate(`/admin/brands/${brand.id}?page=${currentPage}`, {
@@ -215,7 +240,6 @@ const BrandList = () => {
                                                 <FaTrash />
                                             </button>
                                         </div>
-
                                     </td>
                                 </tr>
                             ))
@@ -224,6 +248,7 @@ const BrandList = () => {
                 </table>
             </div>
 
+            {/* --- Pagination --- */}
             {pagination?.last_page > 1 && (
                 <div className="flex justify-center mt-6 space-x-1 flex-wrap">
                     <button

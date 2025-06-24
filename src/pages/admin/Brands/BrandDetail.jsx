@@ -7,12 +7,8 @@ const BrandDetail = () => {
     const { id } = useParams()
     const navigate = useNavigate()
     const location = useLocation()
-    
-    //console.log('location.state:', location.state) // Thêm dòng này
-
 
     const page = location.state?.page || 1
-    
 
     const [brand, setBrand] = useState(location.state?.brand || null)
     const [error, setError] = useState(null)
@@ -40,6 +36,9 @@ const BrandDetail = () => {
     if (error) {
         return <div className="p-6 text-center text-red-600">{error}</div>
     }
+
+    const statusLabel = brand.status === 1 ? 'Hoạt động' : 'Tạm ẩn'
+    const statusColor = brand.status === 1 ? 'text-green-600' : 'text-gray-500'
 
     return (
         <div className="p-6 font-sans">
@@ -69,6 +68,10 @@ const BrandDetail = () => {
                     <div><strong>Tên thương hiệu:</strong> {brand.name}</div>
                     <div><strong>Slug:</strong> {brand.slug}</div>
                     <div><strong>Quốc gia:</strong> {brand.country || 'Không có'}</div>
+                    <div>
+                        <strong>Trạng thái:</strong>{' '}
+                        <span className={`font-semibold ${statusColor}`}>{statusLabel}</span>
+                    </div>
                 </div>
             </div>
         </div>

@@ -1,31 +1,32 @@
-// src/features/brand/brandAPI.js
 import axios from 'axios'
 
-const API_URL = 'http://localhost:8000/api/brands'
+const BASE_URL = 'http://localhost:8000/api/brands'
 
-// Gọi API tạo thương hiệu
+// Tạo thương hiệu mới (gửi kèm ảnh & status)
 export const createBrandAPI = async (formData) => {
-    const response = await axios.post(API_URL, formData, {
+    const response = await axios.post(BASE_URL, formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
     })
     return response.data
 }
 
-export const fetchBrandsAPI = async (page = 1, perPage = 10, search = '', country = '') => {
+// Lấy danh sách brand phân trang + lọc
+export const fetchBrandsAPI = async (page = 1, perPage = 10, search = '', country = '', status = '') => {
     const params = new URLSearchParams({
         page,
         per_page: perPage,
         ...(search && { search }),
         ...(country && { country }),
+        ...(status !== '' && { status }), // status có thể là 0 hoặc 1
     });
 
-    const response = await axios.get(`http://localhost:8000/api/brands?${params}`);
+    const response = await axios.get(`${BASE_URL}?${params}`);
     return response.data;
-};
+}
 
-
+// Cập nhật thương hiệu
 export const updateBrandAPI = async (id, formData) => {
-    const response = await axios.post(`http://localhost:8000/api/brands/${id}?_method=PUT`, formData, {
+    const response = await axios.post(`${BASE_URL}/${id}?_method=PUT`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
     })
     return response.data
@@ -33,14 +34,12 @@ export const updateBrandAPI = async (id, formData) => {
 
 // Xoá thương hiệu
 export const deleteBrandAPI = async (id) => {
-    const response = await axios.delete(`http://localhost:8000/api/brands/${id}`)
+    const response = await axios.delete(`${BASE_URL}/${id}`)
     return response.data
 }
 
-// lấy danh sách các quốc gia
-// Dùng để lọc thương hiệu theo quốc gia
+// Lấy danh sách quốc gia
 export const fetchCountriesAPI = async () => {
-    const response = await axios.get('http://localhost:8000/api/brands/countries')
+    const response = await axios.get(`${BASE_URL}/countries`)
     return response.data
 }
-
