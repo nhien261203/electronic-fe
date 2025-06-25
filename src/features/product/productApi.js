@@ -1,7 +1,7 @@
 // src/features/product/productAPI.js
 import axios from 'axios'
 
-const BASE_URL = 'http://localhost:8000/api/products'
+const BASE_URL = 'http://localhost:8001/api/products'
 
 // Tạo sản phẩm mới (gửi kèm ảnh)
 export const createProductAPI = async (formData) => {

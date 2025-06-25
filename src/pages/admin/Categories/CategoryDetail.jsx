@@ -18,7 +18,7 @@ const CategoryDetail = () => {
 
         setLoading(true)
         axios
-            .get(`http://localhost:8000/api/categories/${id}`)
+            .get(`http://localhost:8001/api/categories/${id}`)
             .then((res) => {
                 setCategory(res.data.data)
             })

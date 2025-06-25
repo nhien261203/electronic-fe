@@ -23,7 +23,7 @@ const EditCategory = () => {
 
     // Load danh mục cha song song (không chặn form)
     useEffect(() => {
-        axios.get('http://localhost:8000/api/categories?per_page=100')
+        axios.get('http://localhost:8001/api/categories?per_page=100')
             .then(res => setCategories(res.data.data || []))
             .catch(() => toast.error('❌ Lỗi tải danh mục cha'))
             .finally(() => setLoadingCategories(false))
@@ -39,7 +39,7 @@ const EditCategory = () => {
             })
             setLoadingForm(false)
         } else {
-            axios.get(`http://localhost:8000/api/categories/${id}`)
+            axios.get(`http://localhost:8001/api/categories/${id}`)
                 .then(res => {
                     const c = res.data.data
                     setForm({
@@ -63,7 +63,7 @@ const EditCategory = () => {
             }
 
             // Gọi API và lấy lại dữ liệu cập nhật (tùy backend)
-            const res = await axios.put(`http://localhost:8000/api/categories/${id}`, payload)
+            const res = await axios.put(`http://localhost:8001/api/categories/${id}`, payload)
 
             toast.success('✅ Cập nhật danh mục thành công!')
 

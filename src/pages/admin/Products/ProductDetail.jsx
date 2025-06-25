@@ -34,7 +34,7 @@ const ProductDetail = () => {
             })
     }, [id, product])
 
-    if (loading) return <div className="p-6 text-blue-600 text-center">Đang tải...</div>
+    // if (loading) return <div className="p-6 text-blue-600 text-center">Đang tải...</div>
     if (error || !product)
         return <div className="p-6 text-red-600 text-center">{error || 'Lỗi không xác định'}</div>
 
