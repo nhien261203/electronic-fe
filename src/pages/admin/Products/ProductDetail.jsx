@@ -7,27 +7,33 @@ import { toast } from 'react-toastify'
 const ProductDetail = () => {
     const { id } = useParams()
     const navigate = useNavigate()
-
     const location = useLocation()
-    const page = location.state?.page || new URLSearchParams(location.search).get('page')
+
+    // Lấy trang từ state hoặc URL query
+    const searchParams = new URLSearchParams(location.search)
+    const fallbackPage = searchParams.get('page') || 1
+    const page = location.state?.page || fallbackPage
 
     const [product, setProduct] = useState(null)
     const [loading, setLoading] = useState(true)
+    const [error, setError] = useState(null)
 
     useEffect(() => {
-        axios.get(`http://localhost:8000/api/products/${id}`)
-            .then(res => {
+        axios
+            .get(`http://localhost:8000/api/products/${id}`)
+            .then((res) => {
                 setProduct(res.data.data)
                 setLoading(false)
             })
             .catch(() => {
-                toast.error('Không tìm thấy sản phẩm')
+                setError('Không tìm thấy sản phẩm')
                 setLoading(false)
             })
     }, [id])
 
-    // if (loading) return <div className="p-6 text-blue-600 text-center">Đang tải...</div>
-    if (!product) return null
+    if (loading) return <div className="p-6 text-blue-600 text-center">Đang tải...</div>
+    if (error || !product)
+        return <div className="p-6 text-red-600 text-center">{error || 'Lỗi không xác định'}</div>
 
     const statusLabel = product.status === 1 ? 'Hiển thị' : 'Ẩn'
     const statusColor = product.status === 1 ? 'text-green-600' : 'text-gray-500'
@@ -47,7 +53,6 @@ const ProductDetail = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700">
                     <div><strong>Tên:</strong> {product.name}</div>
-
                     <div><strong>Giá bán:</strong> {Number(product.price).toLocaleString()}₫</div>
                     <div><strong>Giá gốc:</strong> {Number(product.original_price).toLocaleString()}₫</div>
                     <div><strong>Kho hàng:</strong> {product.quantity}</div>
@@ -79,7 +84,6 @@ const ProductDetail = () => {
                         <span className="text-gray-500">Không có hình ảnh</span>
                     )}
                 </div>
-
             </div>
         </div>
     )

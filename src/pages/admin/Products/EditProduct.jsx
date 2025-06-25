@@ -20,6 +20,9 @@ const EditProduct = () => {
     const navigate = useNavigate()
     const location = useLocation()
 
+    // Lấy lại page từ location.state để quay về đúng trang danh sách
+    const page = location.state?.page || 1
+
     const { currentProduct, loading, success, error } = useSelector((state) => state.product)
     const { categories, brands } = useSelector((state) => state.meta)
 
@@ -37,12 +40,10 @@ const EditProduct = () => {
 
     const [previewImages, setPreviewImages] = useState([])
 
-    // 👉 Bắt đầu NProgress
     useEffect(() => {
         NProgress.start()
         dispatch(fetchMetaData())
         dispatch(fetchProductDetail(id)).finally(() => NProgress.done())
-
         return () => dispatch(clearCurrentProduct())
     }, [dispatch, id])
 
@@ -67,7 +68,8 @@ const EditProduct = () => {
         if (success) {
             toast.success('Cập nhật sản phẩm thành công!')
             dispatch(resetProductState())
-            navigate('/admin/products')
+            // ✅ Quay lại đúng trang
+            navigate(`/admin/products?page=${page}`)
         }
 
         if (error) {
@@ -75,7 +77,7 @@ const EditProduct = () => {
             Object.values(errObj).flat().forEach((msg) => toast.error(msg))
             dispatch(resetProductState())
         }
-    }, [success, error, dispatch, navigate])
+    }, [success, error, dispatch, navigate, page])
 
     const handleChange = (e) => {
         const { name, value, files } = e.target
@@ -83,7 +85,6 @@ const EditProduct = () => {
         if (name === 'images') {
             const filesArray = Array.from(files).filter(file => file.size <= 3 * 1024 * 1024)
             setForm((prev) => ({ ...prev, images: filesArray }))
-            // Thay vì nối vào previewImages, chỉ lấy ảnh mới
             setPreviewImages(filesArray.map((file) => URL.createObjectURL(file)))
         } else {
             setForm((prev) => ({ ...prev, [name]: value }))
@@ -112,7 +113,7 @@ const EditProduct = () => {
                 <textarea name="description" placeholder="Mô tả" value={form.description} onChange={handleChange} className="w-full border p-2 rounded" />
                 <input name="price" type="number" required placeholder="Giá bán (VND)" value={form.price} onChange={handleChange} className="w-full border p-2 rounded" />
                 <input name="original_price" type="number" placeholder="Giá gốc (VND)" value={form.original_price} onChange={handleChange} className="w-full border p-2 rounded" />
-                <input name="quantity" type="number" min="0" required placeholder="Tồn kho (số lượng)" value={form.quantity} onChange={handleChange} className="w-full border p-2 rounded" />
+                <input name="quantity" type="number" min="0" required placeholder="Tồn kho" value={form.quantity} onChange={handleChange} className="w-full border p-2 rounded" />
 
                 <select name="category_id" value={form.category_id} onChange={handleChange} className="w-full border p-2 rounded" required>
                     <option value="">-- Chọn danh mục --</option>
@@ -154,7 +155,7 @@ const EditProduct = () => {
 
                     <button
                         type="button"
-                        onClick={() => navigate('/admin/products')}
+                        onClick={() => navigate(`/admin/products?page=${page}`)}
                         className="bg-gray-300 text-gray-800 px-4 py-2 rounded hover:bg-gray-400"
                     >
                         Huỷ

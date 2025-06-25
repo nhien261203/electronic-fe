@@ -91,11 +91,36 @@ const ProductList = () => {
         prevSearchRef.current = search
     }, [search])
 
-    // Reset về trang 1 khi có thay đổi filter
+    // refs để theo dõi các filter trước đó
+    const prevBrandRef = useRef('')
+    const prevStatusRef = useRef('')
+
+
+    // chi reset page khi thuc su có thay đổi filter
     useEffect(() => {
-        setCurrentPage(1)
-        setSearchParams({ page: 1 })
+        const prevFilters = JSON.stringify({
+            search: prevSearchRef.current,
+            brand: prevBrandRef.current,
+            status: prevStatusRef.current,
+        })
+
+        const currentFilters = JSON.stringify({
+            search,
+            brand: brandFilter,
+            status: statusFilter,
+        })
+
+        if (prevFilters !== currentFilters) {
+            setCurrentPage(1)
+            setSearchParams({ page: 1 })
+        }
+
+        // cập nhật refs
+        prevSearchRef.current = search
+        prevBrandRef.current = brandFilter
+        prevStatusRef.current = statusFilter
     }, [search, brandFilter, statusFilter])
+
 
     // Gọi API khi thay đổi page hoặc filter
     useEffect(() => {
@@ -221,19 +246,22 @@ const ProductList = () => {
                                             <button
                                                 onClick={() => navigate(`/admin/products/${product.id}?page=${currentPage}`, {
                                                     state: { page: currentPage }
-                                                })}
+                                                })
+                                                }
                                                 title="Chi tiết"
                                                 className="hover:text-blue-700"
                                             >
                                                 <FaEye />
                                             </button>
                                             <button
-                                                onClick={() => navigate(`/admin/products/edit/${product.id}`)}
+                                                onClick={() => navigate(`/admin/products/edit/${product.id}`, {
+                                                    state: { page: currentPage }
+                                                })}
                                                 title="Chỉnh sửa"
-                                                className="text-yellow-500 hover:text-yellow-600"
                                             >
                                                 <FaEdit />
                                             </button>
+
                                             <button
                                                 onClick={() => openDeleteModal(product.id)}
                                                 title="Xoá"
