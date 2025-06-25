@@ -1,18 +1,27 @@
 import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams, useLocation } from 'react-router-dom'
 import { toast } from 'react-toastify'
-import { updateProduct, fetchProductDetail, clearCurrentProduct, resetProductState } from '../../../features/product/productSlice'
-import axios from 'axios'
+import {
+    updateProduct,
+    fetchProductDetail,
+    clearCurrentProduct,
+    resetProductState
+} from '../../../features/product/productSlice'
+import { fetchMetaData } from '../../../features/meta/metaSlice'
+
+import NProgress from 'nprogress'
+import 'nprogress/nprogress.css'
+import '../../../styles/nprogress.css'
 
 const EditProduct = () => {
     const { id } = useParams()
     const dispatch = useDispatch()
     const navigate = useNavigate()
-    const { loading, success, error, currentProduct } = useSelector((state) => state.product)
+    const location = useLocation()
 
-    const [categories, setCategories] = useState([])
-    const [brands, setBrands] = useState([])
+    const { currentProduct, loading, success, error } = useSelector((state) => state.product)
+    const { categories, brands } = useSelector((state) => state.meta)
 
     const [form, setForm] = useState({
         name: '',
@@ -25,24 +34,14 @@ const EditProduct = () => {
         status: '1',
         images: []
     })
+
     const [previewImages, setPreviewImages] = useState([])
 
+    // 👉 Bắt đầu NProgress
     useEffect(() => {
-        dispatch(fetchProductDetail(id))
-
-        const fetchMeta = async () => {
-            try {
-                const [catRes, brandRes] = await Promise.all([
-                    axios.get('http://localhost:8000/api/categories?per_page=1000'),
-                    axios.get('http://localhost:8000/api/brands?per_page=1000')
-                ])
-                setCategories(catRes.data.data || [])
-                setBrands(brandRes.data.data || [])
-            } catch {
-                toast.error('Lỗi tải danh mục hoặc thương hiệu')
-            }
-        }
-        fetchMeta()
+        NProgress.start()
+        dispatch(fetchMetaData())
+        dispatch(fetchProductDetail(id)).finally(() => NProgress.done())
 
         return () => dispatch(clearCurrentProduct())
     }, [dispatch, id])
@@ -60,7 +59,7 @@ const EditProduct = () => {
                 status: String(currentProduct.status),
                 images: []
             })
-            setPreviewImages(currentProduct.images.map(img => `http://localhost:8000${img.image_url}`))
+            setPreviewImages(currentProduct.images.map((img) => `http://localhost:8000${img.image_url}`))
         }
     }, [currentProduct])
 
@@ -100,7 +99,6 @@ const EditProduct = () => {
                 formData.append(key, value)
             }
         })
-
         dispatch(updateProduct({ id, formData }))
     }
 
@@ -117,14 +115,14 @@ const EditProduct = () => {
 
                 <select name="category_id" value={form.category_id} onChange={handleChange} className="w-full border p-2 rounded" required>
                     <option value="">-- Chọn danh mục --</option>
-                    {categories.map(cat => (
+                    {categories.map((cat) => (
                         <option key={cat.id} value={cat.id}>{cat.name}</option>
                     ))}
                 </select>
 
                 <select name="brand_id" value={form.brand_id} onChange={handleChange} className="w-full border p-2 rounded" required>
                     <option value="">-- Chọn thương hiệu --</option>
-                    {brands.map(brand => (
+                    {brands.map((brand) => (
                         <option key={brand.id} value={brand.id}>{brand.name}</option>
                     ))}
                 </select>
@@ -161,8 +159,6 @@ const EditProduct = () => {
                         Huỷ
                     </button>
                 </div>
-
-
             </form>
         </div>
     )

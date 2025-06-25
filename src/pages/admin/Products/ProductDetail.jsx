@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import axios from 'axios'
 import { FaArrowLeft } from 'react-icons/fa'
 import { toast } from 'react-toastify'
@@ -7,6 +7,9 @@ import { toast } from 'react-toastify'
 const ProductDetail = () => {
     const { id } = useParams()
     const navigate = useNavigate()
+
+    const location = useLocation()
+    const page = location.state?.page || new URLSearchParams(location.search).get('page')
 
     const [product, setProduct] = useState(null)
     const [loading, setLoading] = useState(true)
@@ -23,7 +26,7 @@ const ProductDetail = () => {
             })
     }, [id])
 
-    if (loading) return <div className="p-6 text-blue-600 text-center">Đang tải...</div>
+    // if (loading) return <div className="p-6 text-blue-600 text-center">Đang tải...</div>
     if (!product) return null
 
     const statusLabel = product.status === 1 ? 'Hiển thị' : 'Ẩn'
@@ -32,7 +35,7 @@ const ProductDetail = () => {
     return (
         <div className="p-6 font-sans">
             <button
-                onClick={() => navigate('/admin/products')}
+                onClick={() => navigate(`/admin/products?page=${page}`)}
                 className="mb-4 inline-flex items-center text-blue-600 hover:underline"
             >
                 <FaArrowLeft className="mr-2" />
@@ -44,7 +47,7 @@ const ProductDetail = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700">
                     <div><strong>Tên:</strong> {product.name}</div>
-                    
+
                     <div><strong>Giá bán:</strong> {Number(product.price).toLocaleString()}₫</div>
                     <div><strong>Giá gốc:</strong> {Number(product.original_price).toLocaleString()}₫</div>
                     <div><strong>Kho hàng:</strong> {product.quantity}</div>
@@ -67,7 +70,7 @@ const ProductDetail = () => {
                         product.images.map((img, idx) => (
                             <img
                                 key={idx}
-                                src={`http://localhost:8000${img.image_url}`} 
+                                src={`http://localhost:8000${img.image_url}`}
                                 alt={`product-${idx}`}
                                 className="w-28 h-28 object-cover border rounded shadow"
                             />

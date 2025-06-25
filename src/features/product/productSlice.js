@@ -1,4 +1,3 @@
-// src/features/product/productSlice.js
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import {
     createProductAPI,
@@ -59,7 +58,12 @@ export const deleteProduct = createAsyncThunk(
 // Lấy chi tiết sản phẩm
 export const fetchProductDetail = createAsyncThunk(
     'product/detail',
-    async (id, { rejectWithValue }) => {
+    async (id, { getState, rejectWithValue }) => {
+        const productFromList = getState().product.products.find(p => p.id === Number(id))
+        if (productFromList) {
+            return { data: productFromList } // Dùng luôn nếu đã có
+        }
+
         try {
             return await fetchProductDetailAPI(id)
         } catch (err) {
@@ -160,7 +164,7 @@ const productSlice = createSlice({
                 state.error = action.payload
             })
 
-            // Chi tiết
+            // Chi tiết sản phẩm
             .addCase(fetchProductDetail.pending, (state) => {
                 state.loading = true
                 state.error = null
