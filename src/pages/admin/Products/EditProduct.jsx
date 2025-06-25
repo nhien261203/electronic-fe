@@ -83,7 +83,8 @@ const EditProduct = () => {
         if (name === 'images') {
             const filesArray = Array.from(files).filter(file => file.size <= 3 * 1024 * 1024)
             setForm((prev) => ({ ...prev, images: filesArray }))
-            setPreviewImages([...previewImages, ...filesArray.map((file) => URL.createObjectURL(file))])
+            // Thay vì nối vào previewImages, chỉ lấy ảnh mới
+            setPreviewImages(filesArray.map((file) => URL.createObjectURL(file)))
         } else {
             setForm((prev) => ({ ...prev, [name]: value }))
         }
