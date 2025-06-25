@@ -9,7 +9,8 @@ NProgress.configure({ showSpinner: false, trickleSpeed: 40 })
 const NProgressBar = () => {
     const brandLoading = useSelector((state) => state.brand.loading)
     const categoryLoading = useSelector((state) => state.category.loading)
-    const loading = brandLoading || categoryLoading
+    const productLoading = useSelector((state) => state.product.loading)
+    const loading = brandLoading || categoryLoading || productLoading
 
     const location = useLocation()
     const mounted = useRef(false)

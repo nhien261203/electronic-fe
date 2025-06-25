@@ -10,14 +10,16 @@ import TableSkeleton from '../../../components/sketelons/TableSkeleton'
 import {
     fetchCategories,
     deleteCategory,
-    resetState
+    resetState,
 } from '../../../features/category/categorySlice'
 
 const CategoryList = () => {
     const dispatch = useDispatch()
     const navigate = useNavigate()
     const location = useLocation()
-    const { categories, loading, error, success, pagination } = useSelector(state => state.category)
+    const { categories, loading, error, success, pagination } = useSelector(
+        (state) => state.category
+    )
 
     const perPage = 8
     const [searchParams, setSearchParams] = useSearchParams()
@@ -32,9 +34,17 @@ const CategoryList = () => {
     const [selectedId, setSelectedId] = useState(null)
     const [isProcessing, setIsProcessing] = useState(false)
 
+    // Giữ local danh sách category để update UI nhanh khi xoá
+    const [localCategories, setLocalCategories] = useState([])
+
     const firstLoad = useRef(true)
     const prevSearch = useRef('')
     const prevStatus = useRef('')
+
+    // Sync redux categories -> localCategories mỗi khi thay đổi từ redux (fetch mới)
+    useEffect(() => {
+        setLocalCategories(categories)
+    }, [categories])
 
     const handleSearch = (e) => setSearch(e.target.value)
     const handleStatusChange = (e) => setStatus(e.target.value)
@@ -52,15 +62,23 @@ const CategoryList = () => {
     const confirmDelete = async () => {
         if (isProcessing) return
         setIsProcessing(true)
+
+        // Lưu tạm danh sách cũ để phục hồi nếu lỗi
+        const prevList = [...localCategories]
+
+        // Xoá nhanh khỏi UI
+        setLocalCategories((list) => list.filter((cat) => cat.id !== selectedId))
+        setFilteredTotal((total) => (total !== null ? total - 1 : null))
+        setConfirmOpen(false)
+
         try {
             await dispatch(deleteCategory(selectedId)).unwrap()
-            toast.success(' Đã xoá danh mục!')
-            const res = await dispatch(fetchCategories({ page: currentPage, perPage, search, status })).unwrap()
-            setFilteredTotal(res.total)
+            toast.success('Đã xoá danh mục!')
+            // Không fetch lại toàn bộ danh sách, đã update local rồi
         } catch (err) {
-            toast.error('Lỗi khi xoá danh mục!')
+            toast.error('Xoá danh mục thất bại!')
+            setLocalCategories(prevList) // Phục hồi
         } finally {
-            setConfirmOpen(false)
             setIsProcessing(false)
         }
     }
@@ -69,12 +87,12 @@ const CategoryList = () => {
         debounce((page, keyword, filterStatus) => {
             dispatch(fetchCategories({ page, perPage, search: keyword, status: filterStatus }))
                 .unwrap()
-                .then(res => setFilteredTotal(res.total))
+                .then((res) => setFilteredTotal(res.total))
+                .catch(() => setFilteredTotal(null))
         }, 300),
         [dispatch]
     )
 
-    // Nếu search/status thay đổi, reset page
     useEffect(() => {
         if (firstLoad.current) return
 
@@ -86,7 +104,6 @@ const CategoryList = () => {
         prevStatus.current = status
     }, [search, status])
 
-    // Fetch categories
     useEffect(() => {
         const statePage = location.state?.page
         const effectivePage = statePage || currentPage
@@ -96,14 +113,14 @@ const CategoryList = () => {
         if (firstLoad.current) {
             dispatch(fetchCategories({ page: effectivePage, perPage, search, status }))
                 .unwrap()
-                .then(res => setFilteredTotal(res.total))
+                .then((res) => setFilteredTotal(res.total))
             firstLoad.current = false
         } else {
             debouncedFetch(effectivePage, search, status)
         }
 
         return () => debouncedFetch.cancel()
-    }, [currentPage, search, status, location.state])
+    }, [currentPage, search, status, location.state, debouncedFetch, dispatch, setSearchParams, perPage])
 
     useEffect(() => {
         if (error) toast.error(error.message || '❌ Lỗi xảy ra!')
@@ -111,7 +128,7 @@ const CategoryList = () => {
             dispatch(fetchCategories({ page: currentPage, perPage, search, status }))
         }
         return () => dispatch(resetState())
-    }, [error, success, dispatch, currentPage])
+    }, [error, success, dispatch, currentPage, perPage, search, status])
 
     return (
         <div className="p-4 md:p-6 font-sans">
@@ -142,12 +159,10 @@ const CategoryList = () => {
                     <option value="1">Hoạt động</option>
                     <option value="0">Tạm ẩn</option>
                 </select>
-                <button
-                    onClick={resetFilters}
-                    className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
-                >
+                <button onClick={resetFilters} className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">
                     🔄 Reset
                 </button>
+                
             </div>
 
             <div className="text-sm text-gray-600 mb-2">
@@ -169,35 +184,49 @@ const CategoryList = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {loading && categories.length === 0 ? (
+                        {loading && localCategories.length === 0 ? (
                             <TableSkeleton columns={5} rows={6} />
+                        ) : localCategories.length === 0 ? (
+                            <tr>
+                                <td colSpan={5} className="p-4 text-center text-gray-500">
+                                    Không có danh mục nào
+                                </td>
+                            </tr>
                         ) : (
-                            categories.map((category) => (
+                            localCategories.map((category) => (
                                 <tr key={category.id} className="border-t hover:bg-gray-50">
                                     <td className="p-3 font-semibold">{category.name}</td>
                                     <td className="p-3">{category.slug}</td>
                                     <td className="p-3">{category.parent?.name || 'Gốc'}</td>
                                     <td className="p-3">
-                                        <span className={`px-2 py-1 rounded text-xs font-semibold 
-                      ${category.status === 1 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                                        <span
+                                            className={`px-2 py-1 rounded text-xs font-semibold ${category.status === 1
+                                                    ? 'bg-green-100 text-green-700'
+                                                    : 'bg-red-100 text-red-700'
+                                                }`}
+                                        >
                                             {category.status === 1 ? 'Hoạt động' : 'Tạm ẩn'}
                                         </span>
                                     </td>
                                     <td className="p-3">
                                         <div className="flex items-center gap-3 text-blue-600">
                                             <button
-                                                onClick={() => navigate(`/admin/categories/${category.id}?page=${currentPage}`, {
-                                                    state: { category, page: currentPage }
-                                                })}
+                                                onClick={() =>
+                                                    navigate(`/admin/categories/${category.id}?page=${currentPage}`, {
+                                                        state: { category, page: currentPage },
+                                                    })
+                                                }
                                                 title="Chi tiết"
                                                 className="hover:text-blue-700"
                                             >
                                                 <FaEye />
                                             </button>
                                             <button
-                                                onClick={() => navigate(`/admin/categories/edit/${category.id}?page=${currentPage}`, {
-                                                    state: { category, page: currentPage }
-                                                })}
+                                                onClick={() =>
+                                                    navigate(`/admin/categories/edit/${category.id}?page=${currentPage}`, {
+                                                        state: { category, page: currentPage },
+                                                    })
+                                                }
                                                 title="Chỉnh sửa"
                                                 className="text-yellow-500 hover:text-yellow-600"
                                             >
@@ -222,25 +251,26 @@ const CategoryList = () => {
             {pagination?.last_page > 1 && (
                 <div className="flex justify-center mt-6 space-x-1 flex-wrap">
                     <button
-                        onClick={() => setCurrentPage(p => p - 1)}
+                        onClick={() => setCurrentPage((p) => p - 1)}
                         disabled={pagination.current_page === 1}
                         className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50"
                     >
                         ◀
                     </button>
-                    {Array.from({ length: pagination.last_page }, (_, i) => i + 1).map(page => (
+                    {Array.from({ length: pagination.last_page }, (_, i) => i + 1).map((page) => (
                         <button
                             key={page}
                             onClick={() => setCurrentPage(page)}
                             className={`px-3 py-1 rounded ${page === pagination.current_page
-                                ? 'bg-blue-600 text-white font-semibold'
-                                : 'bg-gray-100 hover:bg-gray-200'}`}
+                                    ? 'bg-blue-600 text-white font-semibold'
+                                    : 'bg-gray-100 hover:bg-gray-200'
+                                }`}
                         >
                             {page}
                         </button>
                     ))}
                     <button
-                        onClick={() => setCurrentPage(p => p + 1)}
+                        onClick={() => setCurrentPage((p) => p + 1)}
                         disabled={pagination.current_page === pagination.last_page}
                         className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50"
                     >
