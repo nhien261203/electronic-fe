@@ -2,23 +2,26 @@ import React, { useEffect, useState } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import axios from 'axios'
 import { FaArrowLeft } from 'react-icons/fa'
-import { toast } from 'react-toastify'
 
 const ProductDetail = () => {
     const { id } = useParams()
     const navigate = useNavigate()
     const location = useLocation()
 
-    // Lấy trang từ state hoặc URL query
+    // Fallback lấy trang từ state hoặc URL
     const searchParams = new URLSearchParams(location.search)
     const fallbackPage = searchParams.get('page') || 1
     const page = location.state?.page || fallbackPage
 
-    const [product, setProduct] = useState(null)
-    const [loading, setLoading] = useState(true)
+    // Lấy product từ state nếu có (để không gọi lại API)
+    const initialProduct = location.state?.product || null
+    const [product, setProduct] = useState(initialProduct)
+    const [loading, setLoading] = useState(!initialProduct)
     const [error, setError] = useState(null)
 
     useEffect(() => {
+        if (product) return // Đã có sẵn thì không fetch lại
+
         axios
             .get(`http://localhost:8000/api/products/${id}`)
             .then((res) => {
@@ -29,7 +32,7 @@ const ProductDetail = () => {
                 setError('Không tìm thấy sản phẩm')
                 setLoading(false)
             })
-    }, [id])
+    }, [id, product])
 
     if (loading) return <div className="p-6 text-blue-600 text-center">Đang tải...</div>
     if (error || !product)

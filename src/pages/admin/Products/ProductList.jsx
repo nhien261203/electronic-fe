@@ -245,8 +245,9 @@ const ProductList = () => {
                                         <div className="flex gap-3 text-blue-600">
                                             <button
                                                 onClick={() => navigate(`/admin/products/${product.id}?page=${currentPage}`, {
-                                                    state: { page: currentPage }
+                                                    state: { page: currentPage, product }
                                                 })
+
                                                 }
                                                 title="Chi tiết"
                                                 className="hover:text-blue-700"
