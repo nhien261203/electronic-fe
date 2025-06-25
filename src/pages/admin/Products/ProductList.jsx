@@ -15,7 +15,7 @@ const ProductList = () => {
     const navigate = useNavigate()
     const { products, loading, error, success, pagination } = useSelector((state) => state.product)
 
-    const perPage = 10
+    const perPage = 8
     const [searchParams, setSearchParams] = useSearchParams()
     const pageParam = parseInt(searchParams.get('page')) || 1
     const [currentPage, setCurrentPage] = useState(pageParam)
@@ -91,6 +91,13 @@ const ProductList = () => {
         prevSearchRef.current = search
     }, [search])
 
+    // Reset về trang 1 khi có thay đổi filter
+    useEffect(() => {
+        setCurrentPage(1)
+        setSearchParams({ page: 1 })
+    }, [search, brandFilter, statusFilter])
+
+    // Gọi API khi thay đổi page hoặc filter
     useEffect(() => {
         setSearchParams({ page: currentPage })
 
@@ -103,6 +110,7 @@ const ProductList = () => {
 
         return () => debouncedFetch.cancel()
     }, [currentPage, search, statusFilter, brandFilter, dispatch, perPage, setSearchParams])
+
 
     useEffect(() => {
         if (error) toast.error(error.message || 'Đã xảy ra lỗi!')
