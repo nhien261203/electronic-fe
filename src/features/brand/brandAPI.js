@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const BASE_URL = 'http://localhost:8001/api/brands'
+const BASE_URL = 'http://localhost:8000/api/brands'
 
 // Tạo thương hiệu mới (gửi kèm ảnh & status)
 export const createBrandAPI = async (formData) => {

@@ -38,7 +38,7 @@ const ProductList = () => {
     }, [products])
 
     useEffect(() => {
-        axios.get('http://localhost:8001/api/brands?per_page=1000')
+        axios.get('http://localhost:8000/api/brands?per_page=1000')
             .then(res => setBrands(res.data.data || []))
             .catch(() => toast.error('Lỗi tải thương hiệu'))
     }, [])

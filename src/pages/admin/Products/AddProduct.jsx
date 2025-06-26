@@ -71,8 +71,8 @@ const AddProduct = () => {
         const fetchMeta = async () => {
             try {
                 const [catRes, brandRes] = await Promise.all([
-                    axios.get('http://localhost:8001/api/categories?per_page=1000'),
-                    axios.get('http://localhost:8001/api/brands?per_page=1000')
+                    axios.get('http://localhost:8000/api/categories?per_page=1000'),
+                    axios.get('http://localhost:8000/api/brands?per_page=1000')
                 ])
 
                 setCategories(catRes.data.data || [])

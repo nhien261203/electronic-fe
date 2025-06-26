@@ -60,7 +60,7 @@ const EditProduct = () => {
                 status: String(currentProduct.status),
                 images: []
             })
-            setPreviewImages(currentProduct.images.map((img) => `http://localhost:8001${img.image_url}`))
+            setPreviewImages(currentProduct.images.map((img) => `http://localhost:8000${img.image_url}`))
         }
     }, [currentProduct])
 

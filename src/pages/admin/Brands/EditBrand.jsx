@@ -32,9 +32,9 @@ const EditBrand = () => {
                 status: String(brandFromState.status),
                 logo: null // mặc định không thay ảnh
             })
-            setPreview(`http://localhost:8001${brandFromState.logo}`)
+            setPreview(`http://localhost:8000${brandFromState.logo}`)
         } else {
-            axios.get(`http://localhost:8001/api/brands/${id}`)
+            axios.get(`http://localhost:8000/api/brands/${id}`)
                 .then(res => {
                     const data = res.data.data
                     setForm({
@@ -43,7 +43,7 @@ const EditBrand = () => {
                         status: String(data.status),
                         logo: null
                     })
-                    setPreview(`http://localhost:8001${data.logo}`)
+                    setPreview(`http://localhost:8000${data.logo}`)
                 })
                 .catch(() => toast.error('Không tìm thấy thương hiệu'))
         }

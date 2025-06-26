@@ -18,7 +18,7 @@ const BrandDetail = () => {
         if (brand) return
 
         axios
-            .get(`http://localhost:8001/api/brands/${id}`)
+            .get(`http://localhost:8000/api/brands/${id}`)
             .then((res) => {
                 setBrand(res.data.data)
                 setLoading(false)
@@ -57,7 +57,7 @@ const BrandDetail = () => {
 
                 <div className="flex justify-center mb-6">
                     <img
-                        src={`http://localhost:8001${brand.logo}`}
+                        src={`http://localhost:8000${brand.logo}`}
                         alt={brand.name}
                         className="w-40 h-40 object-contain border rounded shadow"
                         loading="lazy"

@@ -19,7 +19,7 @@ const AddCategory = () => {
 
   useEffect(() => {
     axios
-      .get('http://localhost:8001/api/categories?per_page=100')
+      .get('http://localhost:8000/api/categories?per_page=100')
       .then((res) => setCategories(res.data.data))
       .catch(() => {
         toast.error('Lỗi tải danh mục cha')

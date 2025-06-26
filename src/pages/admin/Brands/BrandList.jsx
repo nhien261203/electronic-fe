@@ -225,7 +225,7 @@ const BrandList = () => {
                                 <tr key={brand.id} className="border-t hover:bg-gray-50">
                                     <td className="p-3">
                                         <img
-                                            src={`http://localhost:8001${brand.logo}`}
+                                            src={`http://localhost:8000${brand.logo}`}
                                             alt={brand.name}
                                             className="w-16 h-16 object-contain border rounded"
                                             loading="lazy"
