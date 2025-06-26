@@ -24,7 +24,9 @@ const AddProduct = () => {
         status: '1',
         images: []
     })
+
     const [previewImages, setPreviewImages] = useState([])
+    const [thumbnailIndex, setThumbnailIndex] = useState(0)
 
     const handleChange = (e) => {
         const { name, value, files } = e.target
@@ -33,6 +35,7 @@ const AddProduct = () => {
             const filesArray = Array.from(files).filter(file => file.size <= 3 * 1024 * 1024)
             setForm((prev) => ({ ...prev, images: filesArray }))
             setPreviewImages(filesArray.map((file) => URL.createObjectURL(file)))
+            setThumbnailIndex(0) // reset về ảnh đầu tiên
         } else {
             setForm((prev) => ({ ...prev, [name]: value }))
         }
@@ -49,6 +52,7 @@ const AddProduct = () => {
             }
         })
 
+        formData.append('thumbnail_index', thumbnailIndex)
         dispatch(createProduct(formData))
     }
 
@@ -67,17 +71,15 @@ const AddProduct = () => {
     }, [success, error, dispatch, navigate])
 
     useEffect(() => {
-        // Fetch categories and brands for select dropdowns
         const fetchMeta = async () => {
             try {
                 const [catRes, brandRes] = await Promise.all([
                     axios.get('http://localhost:8000/api/categories?per_page=1000'),
                     axios.get('http://localhost:8000/api/brands?per_page=1000')
                 ])
-
                 setCategories(catRes.data.data || [])
                 setBrands(brandRes.data.data || [])
-            } catch (err) {
+            } catch {
                 toast.error('Lỗi tải dữ liệu danh mục hoặc thương hiệu')
             }
         }
@@ -117,9 +119,28 @@ const AddProduct = () => {
                 <div>
                     <label className="block font-medium mb-1">Hình ảnh sản phẩm (tối đa 3MB mỗi ảnh)</label>
                     <input type="file" name="images" accept="image/*" multiple onChange={handleChange} className="w-full border p-2 rounded" />
-                    <div className="flex gap-2 mt-2 flex-wrap">
+                    <div className="flex gap-3 mt-3 flex-wrap">
                         {previewImages.map((url, idx) => (
-                            <img key={idx} src={url} alt="preview" className="w-24 h-24 object-cover border rounded" />
+                            <div key={idx} className="relative">
+                                <img
+                                    src={url}
+                                    alt="preview"
+                                    className={`w-24 h-24 object-cover border-2 rounded ${thumbnailIndex === idx ? 'border-yellow-500' : 'border-gray-300'}`}
+                                />
+                                <div className="absolute bottom-1 left-1 text-xs bg-white bg-opacity-80 px-1 rounded">
+                                    <label>
+                                        <input
+                                            type="radio"
+                                            name="thumbnail"
+                                            value={idx}
+                                            checked={thumbnailIndex === idx}
+                                            onChange={() => setThumbnailIndex(idx)}
+                                            className="mr-1"
+                                        />
+                                        Đại diện
+                                    </label>
+                                </div>
+                            </div>
                         ))}
                     </div>
                 </div>

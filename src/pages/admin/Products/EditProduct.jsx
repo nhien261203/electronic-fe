@@ -9,18 +9,16 @@ import {
     resetProductState
 } from '../../../features/product/productSlice'
 import { fetchMetaData } from '../../../features/meta/metaSlice'
-
 import NProgress from 'nprogress'
 import 'nprogress/nprogress.css'
 import '../../../styles/nprogress.css'
+import ProductImageManager from './ProductImagesManager'
 
 const EditProduct = () => {
     const { id } = useParams()
     const dispatch = useDispatch()
     const navigate = useNavigate()
     const location = useLocation()
-
-    // Lấy lại page từ location.state để quay về đúng trang danh sách
     const page = location.state?.page || 1
 
     const { currentProduct, loading, success, error } = useSelector((state) => state.product)
@@ -35,10 +33,8 @@ const EditProduct = () => {
         category_id: '',
         brand_id: '',
         status: '1',
-        images: []
+        images: [] // new uploaded images
     })
-
-    const [previewImages, setPreviewImages] = useState([])
 
     useEffect(() => {
         NProgress.start()
@@ -60,7 +56,6 @@ const EditProduct = () => {
                 status: String(currentProduct.status),
                 images: []
             })
-            setPreviewImages(currentProduct.images.map((img) => `http://localhost:8000${img.image_url}`))
         }
     }, [currentProduct])
 
@@ -68,7 +63,6 @@ const EditProduct = () => {
         if (success) {
             toast.success('Cập nhật sản phẩm thành công!')
             dispatch(resetProductState())
-            // ✅ Quay lại đúng trang
             navigate(`/admin/products?page=${page}`)
         }
 
@@ -81,11 +75,9 @@ const EditProduct = () => {
 
     const handleChange = (e) => {
         const { name, value, files } = e.target
-
         if (name === 'images') {
-            const filesArray = Array.from(files).filter(file => file.size <= 3 * 1024 * 1024)
-            setForm((prev) => ({ ...prev, images: filesArray }))
-            setPreviewImages(filesArray.map((file) => URL.createObjectURL(file)))
+            const validFiles = Array.from(files).filter(f => f.size <= 3 * 1024 * 1024)
+            setForm((prev) => ({ ...prev, images: validFiles }))
         } else {
             setForm((prev) => ({ ...prev, [name]: value }))
         }
@@ -96,7 +88,7 @@ const EditProduct = () => {
         const formData = new FormData()
         Object.entries(form).forEach(([key, value]) => {
             if (key === 'images') {
-                value.forEach((img) => formData.append('images[]', img))
+                value.forEach(img => formData.append('images[]', img))
             } else {
                 formData.append(key, value)
             }
@@ -134,15 +126,14 @@ const EditProduct = () => {
                     <option value="0">Ẩn</option>
                 </select>
 
-                <div>
-                    <label className="block font-medium mb-1">Hình ảnh mới (tối đa 3MB mỗi ảnh)</label>
+                {/* Upload thêm ảnh mới */}
+                {/* <div>
+                    <label className="block font-medium mb-1">📤 Ảnh mới (tối đa 3MB mỗi ảnh)</label>
                     <input type="file" name="images" accept="image/*" multiple onChange={handleChange} className="w-full border p-2 rounded" />
-                    <div className="flex gap-2 mt-2 flex-wrap">
-                        {previewImages.map((url, idx) => (
-                            <img key={idx} src={url} alt="preview" className="w-24 h-24 object-cover border rounded" />
-                        ))}
-                    </div>
-                </div>
+                </div> */}
+
+                {/* Quản lý ảnh hiện có */}
+                <ProductImageManager productId={id} />
 
                 <div className="flex gap-2">
                     <button

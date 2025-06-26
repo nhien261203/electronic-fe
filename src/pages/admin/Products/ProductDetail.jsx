@@ -76,13 +76,20 @@ const ProductDetail = () => {
                 <div className="flex flex-wrap gap-2 mt-4">
                     {product.images && product.images.length > 0 ? (
                         product.images.map((img, idx) => (
-                            <img
-                                key={idx}
-                                src={`http://localhost:8000${img.image_url}`}
-                                alt={`product-${idx}`}
-                                className="w-28 h-28 object-cover border rounded shadow"
-                            />
+                            <div key={idx} className="relative w-28 h-28">
+                                <img
+                                    src={`http://localhost:8000${img.image_url}`}
+                                    alt={`product-${idx}`}
+                                    className="w-full h-full object-cover border rounded shadow"
+                                />
+                                {img.is_thumbnail === 1 && (
+                                    <div className="absolute top-1 left-1 bg-yellow-400 text-white text-xs font-semibold px-1 rounded">
+                                        Đại diện
+                                    </div>
+                                )}
+                            </div>
                         ))
+
                     ) : (
                         <span className="text-gray-500">Không có hình ảnh</span>
                     )}
