@@ -8,18 +8,46 @@ import {
     setThumbnail
 } from '../../../features/product/productImageAPI'
 import ConfirmModal from '../../../components/ConfirmModal'
+import { useSelector } from 'react-redux'
 
 const ProductImagesManager = ({ productId }) => {
-    const [images, setImages] = useState([])
+    const currentProduct = useSelector(state => state.product.currentProduct)
+    const initialImages = currentProduct?.images || []
+
+    const [images, setImages] = useState(initialImages)
+    const [loadingImages, setLoadingImages] = useState(initialImages.length === 0)
     const [uploading, setUploading] = useState(false)
     const [confirmOpen, setConfirmOpen] = useState(false)
     const [imageToDelete, setImageToDelete] = useState(null)
 
     useEffect(() => {
-        fetchImagesByProduct(productId)
-            .then(data => setImages(data))
-            .catch(() => toast.error('Lỗi tải ảnh sản phẩm'))
-    }, [productId])
+        let didCancel = false
+
+        const loadImages = async () => {
+            if (initialImages.length > 0) {
+                //console.log('⚡ Dùng ảnh từ Redux cache')
+                setImages(initialImages)
+                setLoadingImages(false)
+                return
+            }
+
+            //console.log('📡 Fetch ảnh từ API')
+            setLoadingImages(true)
+            try {
+                const data = await fetchImagesByProduct(productId)
+                if (!didCancel) setImages(data)
+            } catch {
+                if (!didCancel) toast.error('Lỗi tải ảnh sản phẩm')
+            } finally {
+                if (!didCancel) setLoadingImages(false)
+            }
+        }
+
+        loadImages()
+        return () => {
+            didCancel = true
+        }
+    }, [productId, initialImages])
 
     const handleUpload = async (e) => {
         const files = Array.from(e.target.files)
@@ -28,9 +56,13 @@ const ProductImagesManager = ({ productId }) => {
 
         setUploading(true)
         try {
-            await uploadImages(productId, valid)
-            const res = await fetchImagesByProduct(productId)
-            setImages(res)
+            const uploaded = await uploadImages(productId, valid)
+            if (Array.isArray(uploaded)) {
+                setImages((prev) => [...prev, ...uploaded])
+            } else {
+                const res = await fetchImagesByProduct(productId)
+                setImages(res)
+            }
             toast.success('Tải ảnh lên thành công')
         } catch {
             toast.error('Lỗi khi tải ảnh lên')
@@ -83,42 +115,51 @@ const ProductImagesManager = ({ productId }) => {
                 onChange={handleUpload}
                 disabled={uploading}
             />
-            <div className="flex flex-wrap gap-3 mt-4">
-                {images.map((img) => (
-                    <div key={img.id} className="relative w-28 h-28">
-                        <img
-                            src={`http://localhost:8000${img.image_url}`}
-                            alt="product"
-                            className="w-full h-full object-cover border rounded"
-                        />
-                        {Boolean(img.is_thumbnail) && (
-                            <div className="absolute top-1 left-1 bg-yellow-400 text-white px-1 rounded text-xs font-bold">
-                                Đại diện
-                            </div>
-                        )}
-                        <div className="absolute top-1 right-1 flex gap-1">
-                            {!img.is_thumbnail && (
+
+            {loadingImages ? (
+                <p className="text-gray-500 italic mt-3">Đang tải ảnh...</p>
+            ) : images.length === 0 ? (
+                <p className="text-gray-500 italic mt-3">Chưa có ảnh nào</p>
+            ) : (
+                <div className="flex flex-wrap gap-3 mt-4">
+                    {images.map((img) => (
+                        <div key={img.id} className="relative w-28 h-28">
+                            <img
+                                src={`http://localhost:8000${img.image_url}`}
+                                alt="product"
+                                // loading="lazy"
+                                className="w-full h-full object-cover border rounded"
+                            />
+                            {Boolean(img.is_thumbnail) && (
+                                <div className="absolute top-1 left-1 bg-yellow-400 text-white px-1 rounded text-xs font-bold">
+                                    Đại diện
+                                </div>
+                            )}
+                            <div className="absolute top-1 right-1 flex gap-1">
+                                {!img.is_thumbnail && (
+                                    <button
+                                        type="button"
+                                        
+                                        onClick={() => handleSetThumbnail(img.id)}
+                                        title="Đặt làm đại diện"
+                                        className="text-yellow-500 hover:text-yellow-700"
+                                    >
+                                        <FaStar />
+                                    </button>
+                                )}
                                 <button
                                     type="button"
-                                    onClick={() => handleSetThumbnail(img.id)}
-                                    title="Đặt làm đại diện"
-                                    className="text-yellow-500 hover:text-yellow-700"
+                                    onClick={() => handleDeleteConfirm(img.id)}
+                                    title="Xoá ảnh"
+                                    className="text-red-500 hover:text-red-700"
                                 >
-                                    <FaStar />
+                                    <FaTrash />
                                 </button>
-                            )}
-                            <button
-                                type="button"
-                                onClick={() => handleDeleteConfirm(img.id)}
-                                title="Xoá ảnh"
-                                className="text-red-500 hover:text-red-700"
-                            >
-                                <FaTrash />
-                            </button>
+                            </div>
                         </div>
-                    </div>
-                ))}
-            </div>
+                    ))}
+                </div>
+            )}
 
             <ConfirmModal
                 isOpen={confirmOpen}

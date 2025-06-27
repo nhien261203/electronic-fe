@@ -79,6 +79,7 @@ const ProductDetail = () => {
                             <div key={idx} className="relative w-28 h-28">
                                 <img
                                     src={`http://localhost:8000${img.image_url}`}
+                                    loading="lazy"
                                     alt={`product-${idx}`}
                                     className="w-full h-full object-cover border rounded shadow"
                                 />

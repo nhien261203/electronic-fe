@@ -205,6 +205,7 @@ const ProductList = () => {
                 <table className="min-w-full text-sm">
                     <thead className="bg-gray-100 text-gray-700">
                         <tr>
+                            <th className="p-3 text-left">Ảnh</th>
                             <th className="p-3 text-left">Tên</th>
                             <th className="p-3 text-left">Giá bán</th>
                             <th className="p-3 text-left">Số lượng</th>
@@ -216,7 +217,7 @@ const ProductList = () => {
                     </thead>
                     <tbody>
                         {loading && localProducts.length === 0 ? (
-                            <TableSkeleton columns={6} rows={6} />
+                            <TableSkeleton columns={7} rows={6} />
                         ) : localProducts.length === 0 ? (
                             <tr>
                                 <td colSpan={7} className="p-4 text-center text-gray-500">
@@ -226,6 +227,19 @@ const ProductList = () => {
                         ) : (
                             localProducts.map((product) => (
                                 <tr key={product.id} className="border-t hover:bg-gray-50">
+                                    <td className="p-3 min-w-[90px] w-[90px] md:min-w-[120px] md:w-[120px]">
+                                        {product.thumbnail_url ? (
+                                            <img
+                                                src={`http://localhost:8000${product.thumbnail_url}`}
+                                                alt={product.name}
+                                                className="w-20 h-20 object-cover rounded border mx-auto"
+                                            />
+                                        ) : (
+                                            <span className="text-gray-400 italic text-sm">Không có ảnh</span>
+                                        )}
+                                    </td>
+
+
                                     <td className="p-3 font-medium">{product.name}</td>
                                     <td className="p-3">{product.price.toLocaleString()}₫</td>
                                     <td className="p-3">{product.quantity}</td>

@@ -21,8 +21,8 @@ const EditProduct = () => {
     const location = useLocation()
     const page = location.state?.page || 1
 
-    const { currentProduct, loading, success, error } = useSelector((state) => state.product)
-    const { categories, brands } = useSelector((state) => state.meta)
+    const { currentProduct, loading, success, error, products } = useSelector(state => state.product)
+    const { categories, brands } = useSelector(state => state.meta)
 
     const [form, setForm] = useState({
         name: '',
@@ -33,21 +33,50 @@ const EditProduct = () => {
         category_id: '',
         brand_id: '',
         status: '1',
-        images: [] // new uploaded images
+        images: []
     })
 
+    const [initializing, setInitializing] = useState(true)
+
+    // Tải dữ liệu product + meta nếu cần
     useEffect(() => {
         NProgress.start()
-        dispatch(fetchMetaData())
-        dispatch(fetchProductDetail(id)).finally(() => NProgress.done())
-        return () => dispatch(clearCurrentProduct())
-    }, [dispatch, id])
+        const loadData = async () => {
+            try {
+                const tasks = []
 
+                if (categories.length === 0 || brands.length === 0) {
+                    tasks.push(dispatch(fetchMetaData()).unwrap())
+                }
+
+                // Ưu tiên lấy từ danh sách nếu có
+                const productFromList = products.find(p => p.id === Number(id))
+                if (productFromList) {
+                    dispatch(fetchProductDetail(id)) // để currentProduct đồng bộ
+                } else {
+                    tasks.push(dispatch(fetchProductDetail(id)).unwrap())
+                }
+
+                await Promise.all(tasks)
+            } catch (err) {
+                toast.error('Không thể tải dữ liệu sản phẩm')
+            } finally {
+                setInitializing(false)
+                NProgress.done()
+            }
+        }
+
+        loadData()
+
+        return () => dispatch(clearCurrentProduct())
+    }, [dispatch, id, categories.length, brands.length, products])
+
+    // Gán dữ liệu vào form khi có currentProduct
     useEffect(() => {
         if (currentProduct) {
             setForm({
                 name: currentProduct.name,
-                description: currentProduct.description,
+                description: currentProduct.description || '',
                 price: currentProduct.price,
                 original_price: currentProduct.original_price || '',
                 quantity: currentProduct.quantity,
@@ -59,6 +88,7 @@ const EditProduct = () => {
         }
     }, [currentProduct])
 
+    // Xử lý submit thành công / lỗi
     useEffect(() => {
         if (success) {
             toast.success('Cập nhật sản phẩm thành công!')
@@ -68,7 +98,7 @@ const EditProduct = () => {
 
         if (error) {
             const errObj = error.errors ?? error
-            Object.values(errObj).flat().forEach((msg) => toast.error(msg))
+            Object.values(errObj).flat().forEach(msg => toast.error(msg))
             dispatch(resetProductState())
         }
     }, [success, error, dispatch, navigate, page])
@@ -77,14 +107,15 @@ const EditProduct = () => {
         const { name, value, files } = e.target
         if (name === 'images') {
             const validFiles = Array.from(files).filter(f => f.size <= 3 * 1024 * 1024)
-            setForm((prev) => ({ ...prev, images: validFiles }))
+            setForm(prev => ({ ...prev, images: validFiles }))
         } else {
-            setForm((prev) => ({ ...prev, [name]: value }))
+            setForm(prev => ({ ...prev, [name]: value }))
         }
     }
 
     const handleSubmit = (e) => {
         e.preventDefault()
+
         const formData = new FormData()
         Object.entries(form).forEach(([key, value]) => {
             if (key === 'images') {
@@ -93,8 +124,11 @@ const EditProduct = () => {
                 formData.append(key, value)
             }
         })
+
         dispatch(updateProduct({ id, formData }))
     }
+
+    if (initializing || !currentProduct) return null
 
     return (
         <div className="max-w-3xl mx-auto bg-white p-6 shadow rounded">
@@ -109,14 +143,14 @@ const EditProduct = () => {
 
                 <select name="category_id" value={form.category_id} onChange={handleChange} className="w-full border p-2 rounded" required>
                     <option value="">-- Chọn danh mục --</option>
-                    {categories.map((cat) => (
+                    {categories.map(cat => (
                         <option key={cat.id} value={cat.id}>{cat.name}</option>
                     ))}
                 </select>
 
                 <select name="brand_id" value={form.brand_id} onChange={handleChange} className="w-full border p-2 rounded" required>
                     <option value="">-- Chọn thương hiệu --</option>
-                    {brands.map((brand) => (
+                    {brands.map(brand => (
                         <option key={brand.id} value={brand.id}>{brand.name}</option>
                     ))}
                 </select>
@@ -126,13 +160,6 @@ const EditProduct = () => {
                     <option value="0">Ẩn</option>
                 </select>
 
-                {/* Upload thêm ảnh mới */}
-                {/* <div>
-                    <label className="block font-medium mb-1">📤 Ảnh mới (tối đa 3MB mỗi ảnh)</label>
-                    <input type="file" name="images" accept="image/*" multiple onChange={handleChange} className="w-full border p-2 rounded" />
-                </div> */}
-
-                {/* Quản lý ảnh hiện có */}
                 <ProductImageManager productId={id} />
 
                 <div className="flex gap-2">

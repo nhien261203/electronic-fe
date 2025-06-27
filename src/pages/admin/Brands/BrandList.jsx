@@ -223,7 +223,7 @@ const BrandList = () => {
                         ) : (
                             localBrands.map((brand) => (
                                 <tr key={brand.id} className="border-t hover:bg-gray-50">
-                                    <td className="p-3">
+                                    <td className="p-3 min-w-[90px] w-[90px] md:min-w-[120px] md:w-[120px]">
                                         <img
                                             src={`http://localhost:8000${brand.logo}`}
                                             alt={brand.name}
